@@ -11,6 +11,15 @@
 		B5FD9DBE275081550044C321 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DBD275081550044C321 /* ViewController.swift */; };
 		B5FD9DC02750815C0044C321 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5FD9DBF2750815C0044C321 /* Assets.xcassets */; };
 		B5FD9DC32750815C0044C321 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B5FD9DC12750815C0044C321 /* Main.storyboard */; };
+		B5FD9DCB275082B60044C321 /* Credentials2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DCA275082B60044C321 /* Credentials2.swift */; };
+		B5FD9DCD2750835A0044C321 /* ApiCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DCC2750835A0044C321 /* ApiCall.swift */; };
+		B5FD9DCF2750839B0044C321 /* WriteToLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DCE2750839B0044C321 /* WriteToLog.swift */; };
+		B5FD9DD1275083CE0044C321 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DD0275083CE0044C321 /* Globals.swift */; };
+		B5FD9DD3275084300044C321 /* TimeDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DD22750842F0044C321 /* TimeDelegate.swift */; };
+		B5FD9DD5275085030044C321 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DD4275085030044C321 /* Extensions.swift */; };
+		B5FD9DD72751DF590044C321 /* LastRun.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DD62751DF590044C321 /* LastRun.swift */; };
+		B5FD9DD92751FBD70044C321 /* ResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DD82751FBD70044C321 /* ResultVC.swift */; };
+		B5FD9DDE275217B40044C321 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5FD9DDD275217B40044C321 /* WebKit.framework */; platformFilter = maccatalyst; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +29,15 @@
 		B5FD9DBF2750815C0044C321 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B5FD9DC22750815C0044C321 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B5FD9DC42750815C0044C321 /* Last_Run.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Last_Run.entitlements; sourceTree = "<group>"; };
+		B5FD9DCA275082B60044C321 /* Credentials2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Credentials2.swift; sourceTree = "<group>"; };
+		B5FD9DCC2750835A0044C321 /* ApiCall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApiCall.swift; sourceTree = "<group>"; };
+		B5FD9DCE2750839B0044C321 /* WriteToLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WriteToLog.swift; sourceTree = "<group>"; };
+		B5FD9DD0275083CE0044C321 /* Globals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
+		B5FD9DD22750842F0044C321 /* TimeDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimeDelegate.swift; sourceTree = "<group>"; };
+		B5FD9DD4275085030044C321 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		B5FD9DD62751DF590044C321 /* LastRun.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastRun.swift; sourceTree = "<group>"; };
+		B5FD9DD82751FBD70044C321 /* ResultVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultVC.swift; sourceTree = "<group>"; };
+		B5FD9DDD275217B40044C321 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -27,6 +45,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5FD9DDE275217B40044C321 /* WebKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -38,6 +57,7 @@
 			children = (
 				B5FD9DBA275081550044C321 /* Last Run */,
 				B5FD9DB9275081550044C321 /* Products */,
+				B5FD9DDC275217B40044C321 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -52,13 +72,29 @@
 		B5FD9DBA275081550044C321 /* Last Run */ = {
 			isa = PBXGroup;
 			children = (
+				B5FD9DCC2750835A0044C321 /* ApiCall.swift */,
+				B5FD9DD4275085030044C321 /* Extensions.swift */,
 				B5FD9DBB275081550044C321 /* AppDelegate.swift */,
+				B5FD9DCA275082B60044C321 /* Credentials2.swift */,
+				B5FD9DD0275083CE0044C321 /* Globals.swift */,
+				B5FD9DD62751DF590044C321 /* LastRun.swift */,
+				B5FD9DD82751FBD70044C321 /* ResultVC.swift */,
+				B5FD9DD22750842F0044C321 /* TimeDelegate.swift */,
 				B5FD9DBD275081550044C321 /* ViewController.swift */,
+				B5FD9DCE2750839B0044C321 /* WriteToLog.swift */,
 				B5FD9DBF2750815C0044C321 /* Assets.xcassets */,
 				B5FD9DC12750815C0044C321 /* Main.storyboard */,
 				B5FD9DC42750815C0044C321 /* Last_Run.entitlements */,
 			);
 			path = "Last Run";
+			sourceTree = "<group>";
+		};
+		B5FD9DDC275217B40044C321 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B5FD9DDD275217B40044C321 /* WebKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -131,8 +167,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5FD9DD3275084300044C321 /* TimeDelegate.swift in Sources */,
+				B5FD9DCB275082B60044C321 /* Credentials2.swift in Sources */,
 				B5FD9DBE275081550044C321 /* ViewController.swift in Sources */,
+				B5FD9DD5275085030044C321 /* Extensions.swift in Sources */,
+				B5FD9DD1275083CE0044C321 /* Globals.swift in Sources */,
+				B5FD9DD72751DF590044C321 /* LastRun.swift in Sources */,
 				B5FD9DBC275081550044C321 /* AppDelegate.swift in Sources */,
+				B5FD9DCD2750835A0044C321 /* ApiCall.swift in Sources */,
+				B5FD9DD92751FBD70044C321 /* ResultVC.swift in Sources */,
+				B5FD9DCF2750839B0044C321 /* WriteToLog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,6 +321,7 @@
 				DEVELOPMENT_TEAM = PS2F6S478M;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -284,7 +329,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamfpse.Last-Run";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -304,6 +349,7 @@
 				DEVELOPMENT_TEAM = PS2F6S478M;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -311,7 +357,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.jamfpse.Last-Run";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
