@@ -1,6 +1,6 @@
 # Last Run 
 
-Download: [Last Run](https://github.com/BIG-RAT/lastrun/releases/latest/download/lastrun.zip)
+Download: [Last Run](https://github.com/BIG-RAT/Last-Run/releases/latest/download/Last.Run.zip)
 
 ![alt text](./images/app.png "Last Run")
 
