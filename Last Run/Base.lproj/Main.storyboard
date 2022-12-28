@@ -1111,7 +1111,7 @@
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="224" id="mVe-Qu-ngm"/>
                                 </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="j66-8C-Jlc">
-                                    <rect key="frame" x="1" y="207" width="817" height="16"/>
+                                    <rect key="frame" x="1" y="252" width="857" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="KSm-Je-lUJ">
