@@ -7,157 +7,103 @@
 
 import Cocoa
 import Foundation
-import WebKit
+
+class queryResults: NSObject {
+    @objc var lastRunDate: String
+    @objc var objectName: String
+    @objc var objectType: String
+    
+    init(lastRunDate: String, objectName: String, objectType: String) {
+        self.lastRunDate = lastRunDate
+        self.objectName  = objectName
+        self.objectType  = objectType
+    }
+}
 
 class ResultVC: NSViewController {
 
-    @IBOutlet weak var results_WebView: WKWebView!
     var myQ = DispatchQueue(label: "com.jamf.current")
+    @IBOutlet weak var lastRunTableView: NSTableView!
+    
+    @IBOutlet var results_ArrayController: NSArrayController!
     
     let vc = ViewController()
     
     var resultsDict = [String:[String:String]]()
     var resultPage = ""
     
+    let typeDict = ["mdcp":"Device Config Profile", "mdApp":"Device App", "computerApp":"Computer App", "ccp":"Computer Config Profile", "policy":"Policy"]
+    
     func windowWillClose(notification: NSNotification) {
             NSApp.stopModal()
+    }
+    
+    @IBAction func export_Action(_ sender: Any) {
+        let timeStamp = dateTime()
+        let exportQ   = DispatchQueue(label: "lastrun.exportQ", qos: DispatchQoS.background)
+        let exportFile = "lastRun_\(timeStamp).csv"
+        let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
+        let exportURL  = downloadsDirectory.appendingPathComponent(exportFile)
+        var header = ""
+        var headerArray = [String]()
+        var currentRow  = ""
+        lastRunTableView.tableColumns.enumerated().forEach {
+            (_, column) in
+            header.append("\(column.title)\t")
+            headerArray.append(column.identifier.rawValue)
+        }
+        header.removeLast()
+        currentRow = header
+        exportQ.sync {
+            do {
+                try "\(currentRow)\n".write(to: exportURL, atomically: true, encoding: .utf8)
+                let allObjects = results_ArrayController.arrangedObjects
+                if let exportFileOp = try? FileHandle(forUpdating: exportURL) {
+                    exportFileOp.seekToEndOfFile()
+                    for theObject in allObjects as! [queryResults] {
+                        let objectDict = ["lastRunDate":theObject.lastRunDate, "objectName":theObject.objectName, "objectType":theObject.objectType]
+                        currentRow = ""
+                        for theHeader in headerArray {
+                            currentRow.append(objectDict[theHeader] ?? "")
+                            currentRow.append("\t")
+                        }
+                        currentRow.removeLast()
+                        try exportFileOp.write(contentsOf: "\(currentRow)\n".data(using:String.Encoding.utf8)!)
+                    }
+                    try exportFileOp.close()
+                    _ = Alert().display(header: "Attention:", message: "Results exported to ~/Downloads/\(exportFile)", secondButton: "")
+                }
+            } catch {
+                WriteToLog().message(stringOfText: "error writing \(currentRow) to \(exportURL)")
+            }
+        }
+    }
+    
+    @IBAction func hideBlankDate(_ sender: NSButton) {
+        if sender.state.rawValue == 1 {
+            updateArray(operation: "hide")
+        } else {
+            updateArray(operation: "showAll")
+        }
+    }
+    
+    func updateArray(operation: String) {
+        let arrayRange = 0 ..< (results_ArrayController.arrangedObjects as AnyObject).count
+        results_ArrayController.remove(atArrangedObjectIndexes: IndexSet(integersIn: arrayRange))
+        for (key, value) in resultsDict {
+            for (theName, lastRun) in value {
+                let runDateTime = "\(lastRun)".replacingOccurrences(of: " +0000", with: "")
+                let currentResult = queryResults(lastRunDate: runDateTime, objectName: theName, objectType: typeDict[key]!)
+                if operation == "showAll" || runDateTime != "" {
+                    results_ArrayController.addObject(currentResult)
+                }
+            }
+        }
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-//        WriteToLog().message(stringOfText: "[PreviewController: viewDidLoad]")
-//        self.view.window?.orderOut(self)
-        
-        generatePage()
-            
+
+        updateArray(operation: "showAll")
     }
-    
-    func generatePage() {
-//        resultsDict = results.final
-        let typeDict = ["mdcp":"Device Config Profile", "mdApp":"Device App", "computerApp":"Computer App", "ccp":"Computer Config Profile", "policy":"Policy"]
-//        WriteToLog().message(stringOfText: "present values: \(prevAllRecordValuesArray[recordNumber])")
-//        resultsDict = vc.resultsDict
-        if resultsDict.count > 0 {
-           
-    //            WriteToLog().message(stringOfText: "result: \(result)")
-//                let existingValuesDict = result
-    //            WriteToLog().message(stringOfText: "bundle path: \(Bundle.main.bundlePath)")
-                // old background: #619CC7
-            var tableBody = ""
-            var newLine   = ""
-            for (key, value) in resultsDict {
-                for (theName, lastRun) in value {
-//                    print("\(lastRun)\t\t\(theName)\t\t\(key)")
-                    let runDateTime = "\(lastRun)".replacingOccurrences(of: " +0000", with: "")
-                    newLine = """
-                    <tr>
-                    <td style='text-align:left; width: 26%'>\(runDateTime)</td>
-                    <td style='text-align:left; width: 48%'>\(theName)</td>
-                    <td style='text-align:left; width: 26%'>\(typeDict[key] ?? key)</td>
-                    </tr>
-"""
-                    tableBody = tableBody + newLine
-                }
-            }
-            //                tr:nth-child(even) { background-color: #FFFFFF; }
-                resultPage = """
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                    <style>
-                    body { color: white; background-color: #2F4254; }
-                    table, th, td {
-                    border: 0px solid black;padding-right: 3px;text-align: left;
-                    }
-                    #resultsTable { border-collapse: collapse; table-layout: fixed; margin: auto; }
-                    th, td { border-bottom: 1px solid #4C7A9B; }
-                    </style>
-                    </head>
-                    <body>
-                    <table id="resultsTable">
-                    <tr>
-                    <th style='width: 26%'; onclick="sortTable(0)">Last Run (UTC)</th>
-                    <th style='width: 48%'; onclick="sortTable(1)">Object Name</th>
-                    <th style='width: 26%'; onclick="sortTable(2)">Object Type</th>
-                    </tr>
-                    \(tableBody)
-                    </table>
-            
-            <script>
-            function sortTable(n) {
-              var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-              table = document.getElementById("resultsTable");
-              switching = true;
-              //Set the sorting direction to ascending:
-              dir = "asc";
-              /*Make a loop that will continue until
-              no switching has been done:*/
-              while (switching) {
-                //start by saying: no switching is done:
-                switching = false;
-                rows = table.rows;
-                /*Loop through all table rows (except the
-                first, which contains table headers):*/
-                for (i = 1; i < (rows.length - 1); i++) {
-                  //start by saying there should be no switching:
-                  shouldSwitch = false;
-                  /*Get the two elements you want to compare,
-                  one from current row and one from the next:*/
-                  x = rows[i].getElementsByTagName("TD")[n];
-                  y = rows[i + 1].getElementsByTagName("TD")[n];
-                  /*check if the two rows should switch place,
-                  based on the direction, asc or desc:*/
-                  if (dir == "asc") {
-                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                      //if so, mark as a switch and break the loop:
-                      shouldSwitch= true;
-                      break;
-                    }
-                  } else if (dir == "desc") {
-                    if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                      //if so, mark as a switch and break the loop:
-                      shouldSwitch = true;
-                      break;
-                    }
-                  }
-                }
-                if (shouldSwitch) {
-                  /*If a switch has been marked, make the switch
-                  and mark that a switch has been done:*/
-                  rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                  switching = true;
-                  //Each time a switch is done, increase this count by 1:
-                  switchcount ++;
-                } else {
-                  /*If no switching has been done AND the direction is "asc",
-                  set the direction to "desc" and run the while loop again.*/
-                  if (switchcount == 0 && dir == "asc") {
-                    dir = "desc";
-                    switching = true;
-                  }
-                }
-              }
-            }
-            </script>
-            
-                    </body>
-                </html>
-            """
-    //        WriteToLog().message(stringOfText: "new test: \(previewPage)")
-//            print("\(resultPage)")
-            DispatchQueue.main.async { [self] in
-                self.results_WebView.loadHTMLString(resultPage, baseURL: nil)
-            }
-        } else {
-//            ViewController().alert_dialog("Attention", message: "No records found to lookup.")
-//            DispatchQueue.main.async {
-//                self.view.window?.orderOut(self)
-//                self.view.window?.close()
-//            }
-//            return
-        }
-        
-    }
-    
 }

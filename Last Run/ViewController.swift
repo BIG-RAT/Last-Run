@@ -9,7 +9,6 @@ import Cocoa
 
 class ViewController: NSViewController {
     
-    @IBOutlet weak var saveCreds_button: NSButton!
     
     let fm = FileManager()
     var preferencesDict = [String:AnyObject]()
@@ -18,6 +17,7 @@ class ViewController: NSViewController {
     @IBOutlet weak var jamfServer_TextField: NSTextField!
     @IBOutlet weak var uname_TextField: NSTextField!
     @IBOutlet weak var passwd_TextField: NSSecureTextField!
+    @IBOutlet weak var saveCreds_button: NSButton!
     
     @IBOutlet var policies_button: NSButton!
     @IBOutlet var ccp_button: NSButton!
@@ -44,6 +44,22 @@ class ViewController: NSViewController {
     var checkCompApps = false
     var checkMDApps   = false
     
+    @IBAction func saveCreds_action(_ sender: NSButton) {
+        userDefaults.set(sender.state.rawValue, forKey: "saveCreds")
+        userDefaults.synchronize()
+    }
+    
+    @IBAction func toggleAll(_ sender: NSButton) {
+        if NSEvent.modifierFlags.contains(.option) {
+            let theState = sender.state.rawValue
+            policies_button.state = NSControl.StateValue(rawValue: theState)
+            ccp_button.state = NSControl.StateValue(rawValue: theState)
+            mdcp_button.state = NSControl.StateValue(rawValue: theState)
+            cApps_button.state = NSControl.StateValue(rawValue: theState)
+            mdApps_button.state = NSControl.StateValue(rawValue: theState)
+        }
+    }
+    
     @IBAction func search_action(_ sender: Any) {
         computerList.removeAll()
         policy.idName.removeAll()
@@ -64,22 +80,33 @@ class ViewController: NSViewController {
         
         spinner_progress.startAnimation(self)
         search_button.isEnabled = false
-        LastRun().computers(jamfServer: jamfServer, b64Creds: b64Creds, theEndpoint: "computers", checkPolicies: checkPolicies, checkCompCPs: checkCompCPs, checkCompApps: checkCompApps) { [self]
-            (computerHistory: [String:[String:String]]) in
-            LastRun().devices(jamfServer: jamfServer, b64Creds: b64Creds, theEndpoint: "mobiledevices", checkMDCPs: checkMDCPs, checkMDApps: checkMDApps) { [self]
-                (deviceHistory: [String:[String:String]]) in
-                resultsDict = computerHistory.merging(deviceHistory) { (_, new) in new }
-                for (key, value) in resultsDict {
-                    for (theName, lastRun) in value {
-                        print("\(lastRun)\t\t\(theName)\t\t\(key)")
-
+        runComplete = false
+        TokenDelegate().getToken(whichServer: "source", serverUrl: jamfServer, base64creds: b64Creds) { [self]
+            authResult in
+            let (statusCode,theResult) = authResult
+            if theResult == "success" {
+                userDefaults.set(jamfServer, forKey: "server")
+                userDefaults.set(username, forKey: "username")
+                if saveCreds_button.state.rawValue == 1 {
+                    Credentials2().save(service: "lastrun-\(jamfServer.fqdnFromUrl)", account: username, data: password)
+                }
+                LastRun().computers(jamfServer: jamfServer, b64Creds: b64Creds, theEndpoint: "computers", checkPolicies: checkPolicies, checkCompCPs: checkCompCPs, checkCompApps: checkCompApps) { [self]
+                    (computerHistory: [String:[String:String]]) in
+                    LastRun().devices(jamfServer: jamfServer, b64Creds: b64Creds, theEndpoint: "mobiledevices", checkMDCPs: checkMDCPs, checkMDApps: checkMDApps) { [self]
+                        (deviceHistory: [String:[String:String]]) in
+                        resultsDict = computerHistory.merging(deviceHistory) { (_, new) in new }
+                        spinner_progress.stopAnimation(self)
+                        search_button.isEnabled = true
+                        runComplete = true
+                              
+                        self.performSegue(withIdentifier: "showResults", sender: self)
                     }
                 }
+            } else {
+                _ = Alert().display(header: "Attention:", message: "Failed to authenticate.  Status code: \(statusCode)", secondButton: "")
                 spinner_progress.stopAnimation(self)
                 search_button.isEnabled = true
-                      
-                self.performSegue(withIdentifier: "showResults", sender: self)
-                
+                runComplete = true
             }
         }
     }
@@ -94,8 +121,19 @@ class ViewController: NSViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // Do any additional setup after loading the view.
+        jamfServer_TextField.stringValue = userDefaults.string(forKey: "server") ?? ""
+        uname_TextField.stringValue = userDefaults.string(forKey: "username") ?? ""
+        saveCreds_button.state = NSControl.StateValue(userDefaults.integer(forKey: "saveCreds")) 
+        if jamfServer_TextField.stringValue != "" {
+            let credentialsArray = Credentials2().retrieve(service: "lastrun-\(jamfServer_TextField.stringValue.fqdnFromUrl)")
+            if credentialsArray.count == 2 {
+                uname_TextField.stringValue = credentialsArray[0]
+                passwd_TextField.stringValue = credentialsArray[1]
+            }
+        }
+        NSApp.activate(ignoringOtherApps: true)
     }
 
     override var representedObject: Any? {

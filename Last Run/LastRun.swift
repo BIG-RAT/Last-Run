@@ -2,7 +2,7 @@
 //  LastRun.swift
 //  Last Run
 //
-//  Created by Leslie Helou on 11/26/21.
+//  Created by Leslie Helou on 11/26/21
 //
 
 import Foundation

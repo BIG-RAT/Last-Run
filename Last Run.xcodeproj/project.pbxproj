@@ -19,7 +19,8 @@
 		B5FD9DD5275085030044C321 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DD4275085030044C321 /* Extensions.swift */; };
 		B5FD9DD72751DF590044C321 /* LastRun.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DD62751DF590044C321 /* LastRun.swift */; };
 		B5FD9DD92751FBD70044C321 /* ResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DD82751FBD70044C321 /* ResultVC.swift */; };
-		B5FD9DDE275217B40044C321 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5FD9DDD275217B40044C321 /* WebKit.framework */; platformFilter = maccatalyst; };
+		CE53392029563B9F0018E14D /* TokenDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE53391F29563B9F0018E14D /* TokenDelegate.swift */; };
+		CE53392229565F270018E14D /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE53392129565F270018E14D /* Alert.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,7 +38,8 @@
 		B5FD9DD4275085030044C321 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		B5FD9DD62751DF590044C321 /* LastRun.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastRun.swift; sourceTree = "<group>"; };
 		B5FD9DD82751FBD70044C321 /* ResultVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultVC.swift; sourceTree = "<group>"; };
-		B5FD9DDD275217B40044C321 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		CE53391F29563B9F0018E14D /* TokenDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenDelegate.swift; sourceTree = "<group>"; };
+		CE53392129565F270018E14D /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,7 +47,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5FD9DDE275217B40044C321 /* WebKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,6 +73,7 @@
 		B5FD9DBA275081550044C321 /* Last Run */ = {
 			isa = PBXGroup;
 			children = (
+				CE53392129565F270018E14D /* Alert.swift */,
 				B5FD9DCC2750835A0044C321 /* ApiCall.swift */,
 				B5FD9DD4275085030044C321 /* Extensions.swift */,
 				B5FD9DBB275081550044C321 /* AppDelegate.swift */,
@@ -80,6 +82,7 @@
 				B5FD9DD62751DF590044C321 /* LastRun.swift */,
 				B5FD9DD82751FBD70044C321 /* ResultVC.swift */,
 				B5FD9DD22750842F0044C321 /* TimeDelegate.swift */,
+				CE53391F29563B9F0018E14D /* TokenDelegate.swift */,
 				B5FD9DBD275081550044C321 /* ViewController.swift */,
 				B5FD9DCE2750839B0044C321 /* WriteToLog.swift */,
 				B5FD9DBF2750815C0044C321 /* Assets.xcassets */,
@@ -92,7 +95,6 @@
 		B5FD9DDC275217B40044C321 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				B5FD9DDD275217B40044C321 /* WebKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -172,6 +174,8 @@
 				B5FD9DBE275081550044C321 /* ViewController.swift in Sources */,
 				B5FD9DD5275085030044C321 /* Extensions.swift in Sources */,
 				B5FD9DD1275083CE0044C321 /* Globals.swift in Sources */,
+				CE53392029563B9F0018E14D /* TokenDelegate.swift in Sources */,
+				CE53392229565F270018E14D /* Alert.swift in Sources */,
 				B5FD9DD72751DF590044C321 /* LastRun.swift in Sources */,
 				B5FD9DBC275081550044C321 /* AppDelegate.swift in Sources */,
 				B5FD9DCD2750835A0044C321 /* ApiCall.swift in Sources */,
@@ -318,7 +322,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PS2F6S478M;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -346,7 +350,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PS2F6S478M;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";

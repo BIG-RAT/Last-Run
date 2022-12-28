@@ -2,7 +2,7 @@
 //  ApiCall.swift
 //  Last Run
 //
-//  Created by Leslie Helou on 11/25/21.
+//  Created by Leslie Helou on 11/25/21
 //
 
 import Cocoa
@@ -39,7 +39,8 @@ class ApiCall: NSObject, URLSessionDelegate {
             
             jsonRequest.httpMethod = "GET"
             let destConf = URLSessionConfiguration.ephemeral
-            destConf.httpAdditionalHeaders = ["Authorization" : "Basic \(base64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+//            destConf.httpAdditionalHeaders = ["Authorization" : "Basic \(base64Creds)", "Content-Type" : "application/json", "Accept" : "application/json"]
+            destConf.httpAdditionalHeaders = ["Authorization" : "\(String(describing: jamfProServer.authType["source"]!)) \(String(describing: jamfProServer.authCreds["source"]!))", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : appInfo.userAgentHeader]
             let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
             let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
                 (data, response, error) -> Void in
