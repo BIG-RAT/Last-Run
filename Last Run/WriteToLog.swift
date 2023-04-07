@@ -58,25 +58,27 @@ class WriteToLog {
             // remove old log files
             if logCount > Log.maxFiles {
                 for i in (0..<logCount-Log.maxFiles) {
-                    Logger.jamfstatus.info("Deleting log file: \(logArray[i], privacy: .public)")
+                    Logger.lastrun.info("Deleting log file: \(logArray[i], privacy: .public)")
                     
                     do {
                         try fm.removeItem(atPath: logArray[i])
                     }
                     catch let error as NSError {
-                        Logger.jamfstatus.info("Error deleting log file: \(logArray[i], privacy: .public) \n\(error, privacy: .public)")
+                        Logger.lastrun.info("Error deleting log file: \(logArray[i], privacy: .public) \n\(error, privacy: .public)")
                     }
                 }
             }
             // zip current log if it's over 5MB
             let dateTmpArray = getCurrentTime().split(separator: "_")
             let dateStamp    = dateTmpArray[0]
-            zipIt(args: "/usr/bin/zip -rm -jj -o \(Log.path!)jamfStatus_\(dateStamp) \(Log.path!)\(Log.file)") {
+            zipIt(args: "/usr/bin/zip -rm -jj -o \(Log.path!)lastrun\(dateStamp) \(Log.path!)\(Log.file)") { [self]
                 (result: String) in
                 print("zipIt result: \(result)")
-                self.createLogFile()
-                completionHandler(result)
-                return
+                createLogFile() {
+                    (result: String) in
+                    completionHandler(result)
+                    return
+                }
             }
         } catch {
             completionHandler("")
