@@ -12,6 +12,14 @@ var refreshInterval:UInt32 = 20*60  // 20 minutes
 var runComplete            = false
 let userDefaults           = UserDefaults.standard
 
+
+struct appInfo {
+    static let dict            = Bundle.main.infoDictionary!
+    static let version         = dict["CFBundleShortVersionString"] as! String
+    static let name            = dict["CFBundleExecutable"] as! String
+    static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(appInfo.version)"
+}
+
 struct jamfProVersion {
     static var major = 0
     static var minor = 0
@@ -36,14 +44,6 @@ struct LogLevel {
 struct results {
     static var final = [String:[String:String]]()
 }
-
-struct appInfo {
-    static let dict            = Bundle.main.infoDictionary!
-    static let version         = dict["CFBundleShortVersionString"] as! String
-    static let name            = dict["CFBundleExecutable"] as! String
-    static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(appInfo.version)"
-}
-
 struct history {
     static var startTime = Date()
 }
