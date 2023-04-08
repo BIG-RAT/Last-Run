@@ -752,10 +752,10 @@
                                 </secureTextFieldCell>
                             </secureTextField>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ea8-Us-AiH">
-                                <rect key="frame" x="18" y="231" width="110" height="41"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" id="8yU-8M-5wd">
+                                <rect key="frame" x="37" y="231" width="91" height="41"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" id="8yU-8M-5wd">
                                     <font key="font" metaFont="system" size="16"/>
-                                    <string key="title">Jamf Pro 
+                                    <string key="title">Jamf Pro
 Server URL:</string>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -956,7 +956,7 @@ DQ
                             <constraint firstItem="njl-4a-0AT" firstAttribute="top" secondItem="PVa-EC-eYH" secondAttribute="bottom" constant="14" id="jKv-xv-Vsv"/>
                             <constraint firstItem="e6z-jw-kPz" firstAttribute="top" secondItem="dUD-yO-u8U" secondAttribute="bottom" constant="3" id="jqd-EV-dXK"/>
                             <constraint firstAttribute="bottom" secondItem="O2u-Qj-4Cs" secondAttribute="bottom" constant="37" id="laC-1F-Doh"/>
-                            <constraint firstItem="ea8-Us-AiH" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" symbolic="YES" id="nO1-S7-uze"/>
+                            <constraint firstItem="ea8-Us-AiH" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="39" id="nO1-S7-uze"/>
                             <constraint firstItem="PPD-9b-Z4B" firstAttribute="top" secondItem="0lM-LV-fnI" secondAttribute="bottom" constant="95" id="oee-cl-DPb"/>
                             <constraint firstItem="qBh-u0-M0k" firstAttribute="trailing" secondItem="h4K-0i-F2V" secondAttribute="trailing" id="prk-RH-I1K"/>
                             <constraint firstItem="PVa-EC-eYH" firstAttribute="top" secondItem="h4K-0i-F2V" secondAttribute="bottom" constant="2" id="tS4-nq-yjs"/>

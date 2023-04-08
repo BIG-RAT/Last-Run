@@ -29,6 +29,7 @@ class LastRun {
 //                print("computers: \(result)")
             if result.count > 0 {
                 computerList = result["computers"] as! [[String:Any]]
+                WriteToLog().message(stringOfText: "found \(computerList.count) policies")
                 
                 var counter = 0
                 objectLastRun["policy"] = [:]
@@ -131,10 +132,10 @@ class LastRun {
     //                                    print("computers: \(result)")
                                         var allProfiles = [String]()
                                         
-                                        WriteToLog().message(stringOfText: "found \(result.count) computer configuration profiles")
-                                        if result.count > 0 || checkCompApps {
+//                                        if result.count > 0 || checkCompApps {
                                             if result.count > 0 {
                                                 let arrayOfProfiles = result["os_x_configuration_profiles"] as! [[String:Any]]
+                                                WriteToLog().message(stringOfText: "found \(arrayOfProfiles.count) computer configuration profiles")
                                                 if arrayOfProfiles.count > 0 {
                                                     for theProfile in arrayOfProfiles {
                                                         allProfiles.append("\(String(describing: theProfile["name"]!))")
@@ -209,8 +210,7 @@ class LastRun {
                                                 }
                                                 completion(resultsDict)
                                             }
-                                            
-                                        }
+//                                        }
                                     }
                                 }
 //                            }
