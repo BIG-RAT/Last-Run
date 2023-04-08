@@ -14,12 +14,30 @@ class WriteToLog {
 //    var writeToLogQ = DispatchQueue(label: "com.jamf.writeToLogQ", qos: DispatchQoS.utility)
     let fm          = FileManager()
     
-    func createLogFile(completionHandler: @escaping (_ result: String) -> Void) {
-        if !self.fm.fileExists(atPath: Log.path!) {
-            self.fm.createFile(atPath: Log.path!, contents: nil, attributes: nil)
+    func createLogFolder(completionHandler: @escaping (_ result: String) -> Void) {
+        DispatchQueue.main.async { [self] in
+            var attributes = [FileAttributeKey: Any]()
+            attributes[.posixPermissions] = 0o700
+            do {
+                try fm.createDirectory(atPath: Log.path!, withIntermediateDirectories: true, attributes: attributes)
+                completionHandler("log folder created")
+            } catch {
+                completionHandler("log folder not created")
+            }
         }
-        if !self.fm.fileExists(atPath: Log.path! + Log.file) {
-            self.fm.createFile(atPath: Log.path! + Log.file, contents: nil, attributes: nil)
+    }
+    
+    func createLogFile(completionHandler: @escaping (_ result: String) -> Void) {
+        if !fm.fileExists(atPath: Log.path!) {
+            createLogFolder() { [self]
+                (result: String) in
+                print(result)
+
+                fm.createFile(atPath: Log.path! + Log.file, contents: nil, attributes: nil)
+            }
+            
+        } else if !fm.fileExists(atPath: Log.path! + Log.file) {
+            fm.createFile(atPath: Log.path! + Log.file, contents: nil, attributes: nil)
         }
         completionHandler("created")
     }
@@ -98,23 +116,15 @@ class WriteToLog {
                 print("failed to create log file at \(Log.path!)\(Log.file)")
             }
         }
-        createLogFile() { [self]
-            (result: String) in
             logCleanup() {
                 (result: String) in
-//                self.writeToLogQ.sync {
-//                    for theString in stringOfText {
-                        let logString = "\(self.logDate()) \(stringOfText)\n"
+                let logString = "\(self.logDate()) \(stringOfText)\n"
 
-                        self.logFileW?.seekToEndOfFile()
+                self.logFileW?.seekToEndOfFile()
 
-                        let logText = (logString as NSString).data(using: String.Encoding.utf8.rawValue)
-                        self.logFileW?.write(logText!)
-//                    }
-    //                self.logFileW?.closeFile()
-//                }
+                let logText = (logString as NSString).data(using: String.Encoding.utf8.rawValue)
+                self.logFileW?.write(logText!)
             }
-        }
     }
     
     func getCurrentTime() -> String {

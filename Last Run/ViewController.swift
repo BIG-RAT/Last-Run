@@ -61,53 +61,56 @@ class ViewController: NSViewController {
     }
     
     @IBAction func search_action(_ sender: Any) {
-        computerList.removeAll()
-        policy.idName.removeAll()
-        objectLastRun.removeAll()
-        resultsDict.removeAll()
-        
-        jamfServer = jamfServer_TextField.stringValue
-        username   = uname_TextField.stringValue
-        password   = passwd_TextField.stringValue
-        let creds  = "\(username):\(password)"
-        b64Creds   = creds.data(using: .utf8)?.base64EncodedString() ?? ""
-        jamfProServer.validToken["source"] = false
- 
-        checkPolicies = (policies_button.state.rawValue == 1) ? true:false
-        checkCompCPs  = (ccp_button.state.rawValue == 1) ? true:false
-        checkCompApps = (cApps_button.state.rawValue == 1) ? true:false
-        checkMDCPs    = (mdcp_button.state.rawValue == 1) ? true:false
-        checkMDApps   = (mdApps_button.state.rawValue == 1) ? true:false
-        
-        spinner_progress.startAnimation(self)
-        search_button.isEnabled = false
-        runComplete = false
-        TokenDelegate().getToken(whichServer: "source", serverUrl: jamfServer, base64creds: b64Creds) { [self]
-            authResult in
-            let (statusCode,theResult) = authResult
-            if theResult == "success" {
-                userDefaults.set(jamfServer, forKey: "server")
-                userDefaults.set(username, forKey: "username")
-                if saveCreds_button.state.rawValue == 1 {
-                    Credentials2().save(service: "lastrun-\(jamfServer.fqdnFromUrl)", account: username, data: password)
-                }
-                LastRun().computers(jamfServer: jamfServer, b64Creds: b64Creds, theEndpoint: "computers", checkPolicies: checkPolicies, checkCompCPs: checkCompCPs, checkCompApps: checkCompApps) { [self]
-                    (computerHistory: [String:[String:String]]) in
-                    LastRun().devices(jamfServer: jamfServer, b64Creds: b64Creds, theEndpoint: "mobiledevices", checkMDCPs: checkMDCPs, checkMDApps: checkMDApps) { [self]
-                        (deviceHistory: [String:[String:String]]) in
-                        resultsDict = computerHistory.merging(deviceHistory) { (_, new) in new }
-                        spinner_progress.stopAnimation(self)
-                        search_button.isEnabled = true
-                        runComplete = true
-                              
-                        self.performSegue(withIdentifier: "showResults", sender: self)
+        WriteToLog().createLogFile() { [self]
+            (result: String) in
+            computerList.removeAll()
+            policy.idName.removeAll()
+            objectLastRun.removeAll()
+            resultsDict.removeAll()
+            
+            jamfServer = jamfServer_TextField.stringValue
+            username   = uname_TextField.stringValue
+            password   = passwd_TextField.stringValue
+            let creds  = "\(username):\(password)"
+            b64Creds   = creds.data(using: .utf8)?.base64EncodedString() ?? ""
+            jamfProServer.validToken["source"] = false
+            
+            checkPolicies = (policies_button.state.rawValue == 1) ? true:false
+            checkCompCPs  = (ccp_button.state.rawValue == 1) ? true:false
+            checkCompApps = (cApps_button.state.rawValue == 1) ? true:false
+            checkMDCPs    = (mdcp_button.state.rawValue == 1) ? true:false
+            checkMDApps   = (mdApps_button.state.rawValue == 1) ? true:false
+            
+            spinner_progress.startAnimation(self)
+            search_button.isEnabled = false
+            runComplete = false
+            TokenDelegate().getToken(whichServer: "source", serverUrl: jamfServer, base64creds: b64Creds) { [self]
+                authResult in
+                let (statusCode,theResult) = authResult
+                if theResult == "success" {
+                    userDefaults.set(jamfServer, forKey: "server")
+                    userDefaults.set(username, forKey: "username")
+                    if saveCreds_button.state.rawValue == 1 {
+                        Credentials2().save(service: "lastrun-\(jamfServer.fqdnFromUrl)", account: username, data: password)
                     }
+                    LastRun().computers(jamfServer: jamfServer, b64Creds: b64Creds, theEndpoint: "computers", checkPolicies: checkPolicies, checkCompCPs: checkCompCPs, checkCompApps: checkCompApps) { [self]
+                        (computerHistory: [String:[String:String]]) in
+                        LastRun().devices(jamfServer: jamfServer, b64Creds: b64Creds, theEndpoint: "mobiledevices", checkMDCPs: checkMDCPs, checkMDApps: checkMDApps) { [self]
+                            (deviceHistory: [String:[String:String]]) in
+                            resultsDict = computerHistory.merging(deviceHistory) { (_, new) in new }
+                            spinner_progress.stopAnimation(self)
+                            search_button.isEnabled = true
+                            runComplete = true
+                            
+                            self.performSegue(withIdentifier: "showResults", sender: self)
+                        }
+                    }
+                } else {
+                    _ = Alert().display(header: "Attention:", message: "Failed to authenticate.  Status code: \(statusCode)", secondButton: "")
+                    spinner_progress.stopAnimation(self)
+                    search_button.isEnabled = true
+                    runComplete = true
                 }
-            } else {
-                _ = Alert().display(header: "Attention:", message: "Failed to authenticate.  Status code: \(statusCode)", secondButton: "")
-                spinner_progress.stopAnimation(self)
-                search_button.isEnabled = true
-                runComplete = true
             }
         }
     }
@@ -124,17 +127,20 @@ class ViewController: NSViewController {
         super.viewDidLoad()
         
         // Do any additional setup after loading the view.
-        jamfServer_TextField.stringValue = userDefaults.string(forKey: "server") ?? ""
-        uname_TextField.stringValue = userDefaults.string(forKey: "username") ?? ""
-        saveCreds_button.state = NSControl.StateValue(userDefaults.integer(forKey: "saveCreds")) 
-        if jamfServer_TextField.stringValue != "" {
-            let credentialsArray = Credentials2().retrieve(service: "lastrun-\(jamfServer_TextField.stringValue.fqdnFromUrl)")
-            if credentialsArray.count == 2 {
-                uname_TextField.stringValue = credentialsArray[0]
-                passwd_TextField.stringValue = credentialsArray[1]
+        WriteToLog().createLogFile() { [self]
+            (result: String) in
+            jamfServer_TextField.stringValue = userDefaults.string(forKey: "server") ?? ""
+            uname_TextField.stringValue = userDefaults.string(forKey: "username") ?? ""
+            saveCreds_button.state = NSControl.StateValue(userDefaults.integer(forKey: "saveCreds")) 
+            if jamfServer_TextField.stringValue != "" {
+                let credentialsArray = Credentials2().retrieve(service: "lastrun-\(jamfServer_TextField.stringValue.fqdnFromUrl)")
+                if credentialsArray.count == 2 {
+                    uname_TextField.stringValue = credentialsArray[0]
+                    passwd_TextField.stringValue = credentialsArray[1]
+                }
             }
+            NSApp.activate(ignoringOtherApps: true)
         }
-        NSApp.activate(ignoringOtherApps: true)
     }
 
     override var representedObject: Any? {
