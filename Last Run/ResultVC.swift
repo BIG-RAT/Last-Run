@@ -103,7 +103,9 @@ class ResultVC: NSViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        lastRunTableView.tableColumns.forEach { (column) in
+            column.headerCell.attributedStringValue = NSAttributedString(string: column.title, attributes: [NSAttributedString.Key.font: NSFont.boldSystemFont(ofSize: 18)])
+        }
         updateArray(operation: "showAll")
     }
 }

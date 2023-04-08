@@ -39,11 +39,12 @@ class LastRun {
                 for computer in computerList {
                     let computerID = computer["id"] as! Int
 //                    print("computerID: \(computerID)")
+                    
+                    WriteToLog().message(stringOfText: "checking computer id \(computerID)'s history")
                     ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: "computerhistory/id/\(computerID)", skip: false) { [self]
                         (result: [String:AnyObject]) in
                         counter += 1
                         let computerHistory = result["computer_history"] as? [String:Any]
-                        
                         
                         if checkPolicies {
 //                            print("check policies")
@@ -115,6 +116,7 @@ class LastRun {
 //                                        print("resultsDict for policies: \(resultsDict)")
                                     }
                                     // find policies that haven't run
+                                    WriteToLog().message(stringOfText: "scanning for policies with no last run information")
                                     for (policyId, policyName) in policy.idName {
                                         if usedPolicyIDs.firstIndex(of: policyId) == nil {
                                             resultsDict["policy"]!["\(policyName)  (\(policyId))"] = ""
@@ -123,14 +125,19 @@ class LastRun {
                                     var commandType = ""
     //                                print("objectLastRun[\"ccp\"]: \(String(describing: objectLastRun["ccp"]!))")
                                     var compProfilesArray = [String]()
+                                    WriteToLog().message(stringOfText: "scanning for computer configuration profiles that haven't run")
                                     ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: "osxconfigurationprofiles", skip: !checkCompCPs) { [self]
                                         (result: [String:AnyObject]) in
     //                                    print("computers: \(result)")
+                                        var allProfiles = [String]()
+                                        
+                                        WriteToLog().message(stringOfText: "found \(result.count) computer configuration profiles")
                                         if result.count > 0 || checkCompApps {
                                             if result.count > 0 {
                                                 let arrayOfProfiles = result["os_x_configuration_profiles"] as! [[String:Any]]
                                                 if arrayOfProfiles.count > 0 {
                                                     for theProfile in arrayOfProfiles {
+                                                        allProfiles.append("\(String(describing: theProfile["name"]!))")
                                                         compProfilesArray.append("Install Configuration Profile \(String(describing: theProfile["name"]!))")
                                                         compProfilesArray.append("Remove Configuration Profile \(String(describing: theProfile["name"]!))")
                                                     }
@@ -175,15 +182,35 @@ class LastRun {
                                                     }
                                                 }
                                             }
+                                            // search for profiles with no run info
+                                            for profileName in allProfiles {
+                                                if resultsDict["ccp"]!["\(profileName)"] == nil {
+                                                    resultsDict["ccp"]!["\(profileName)"] = ""
+                                                }
+                                            }
+                                            // fetch all Mac Apps
+                                            WriteToLog().message(stringOfText: "scanning for Mac Apps that haven't run")
+                                            ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: "macapplications", skip: !checkCompApps) { [self]
+                                                (result: [String:AnyObject]) in
+                                                //                                    print("computers: \(result)")
+                                                
+                                                WriteToLog().message(stringOfText: "found \(result.count) Mac Apps")
+                                                if result.count > 0 && checkCompApps {
+                                                    let arrayOfMacApps = result["mac_applications"] as! [[String:Any]]
+                                                    if arrayOfMacApps.count > 0 {
+                                                        for theMacApp in arrayOfMacApps {
+                                                            if let appName = theMacApp["name"] as? String {
+                                                                if resultsDict["computerApp"]!["\(appName)"] == nil {
+                                                                    resultsDict["computerApp"]!["\(appName)"] = ""
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                completion(resultsDict)
+                                            }
+                                            
                                         }
-
-//                                        for (key, value) in resultsDict {
-//                                            for (theName, lastRun) in value {
-//                                                print("\(lastRun)\t\t\(theName)\t\t\(key)")
-//                                                
-//                                            }
-//                                        }
-                                        completion(resultsDict)
                                     }
                                 }
 //                            }
@@ -246,11 +273,14 @@ class LastRun {
                                 var mdProfilesArray = [String]()
                                 ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: "mobiledeviceconfigurationprofiles", skip: !checkMDCPs) { [self]
                                     (mdcp: [String:AnyObject]) in
+                                    
+                                    var allProfiles = [String]()
     //                                    print("mobile devices: \(result)")
                                     if mdcp.count > 0 {
                                         let arrayOfProfiles = mdcp["configuration_profiles"] as! [[String:Any]]
                                         if arrayOfProfiles.count > 0 {
                                             for theProfile in arrayOfProfiles {
+                                                allProfiles.append("\(String(describing: theProfile["name"]!))")
                                                 mdProfilesArray.append("Install Configuration Profile \(String(describing: theProfile["name"]!))")
                                                 mdProfilesArray.append("Remove Configuration Profile \(String(describing: theProfile["name"]!))")
                                             }
@@ -278,19 +308,28 @@ class LastRun {
                                                 l_profileName = "\(l_profileName)\(action)"
         //                                        print("\(l_profileName)\t\t\(NSDate(timeIntervalSince1970:TimeInterval((value/1000))))")
                                                 resultsDict[commandType]!["\(l_profileName)"] = "\(NSDate(timeIntervalSince1970:TimeInterval((value/1000))))"
-
                                             }
                                         }
                                     }
+                                    // check for profiles with no run info
+                                    for profileName in allProfiles {
+                                        if resultsDict["mdcp"]!["\(profileName)"] == nil {
+                                            resultsDict["mdcp"]!["\(profileName)"] = ""
+                                        }
+                                    }
+                                    
                                     // check mobile device App Store Apps
                                     var mdAppsArray = [String]()
                                     ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: "mobiledeviceapplications", skip: !checkMDApps) { [self]
                                         (mobileDevceApps: [String:AnyObject]) in
     //                                    print("mobile devices: \(result)")
+                                        var allMobileApps = [String]()
+                                        
                                         if mobileDevceApps.count > 0 {
                                             let arrayOfApps = mobileDevceApps["mobile_device_applications"] as! [[String:Any]]
                                             if arrayOfApps.count > 0 {
                                                 for theApp in arrayOfApps {
+                                                    allMobileApps.append("\(String(describing: theApp["name"]!))")
                                                     mdAppsArray.append("Install App - \(String(describing: theApp["name"]!))")
                                                     mdAppsArray.append("Remove App - \(String(describing: theApp["name"]!))")
                                                 }
@@ -324,11 +363,13 @@ class LastRun {
                                                 }
                                             }
                                         }
-//                                        for (key, value) in resultsDict {
-//                                            for (theName, lastRun) in value {
-//                                                print("\(lastRun)\t\t\(theName)\t\t\(key)")
-//                                            }
-//                                        }
+                                        // check of Mobile Device Apps with no run info
+                                        for appName in allMobileApps {
+                                            if resultsDict["mdApp"]!["\(appName)"] == nil {
+                                                resultsDict["mdApp"]!["\(appName)"] = ""
+                                            }
+                                        }
+                                        
                                         completion(resultsDict)
                                     }   // ApiCall().getRecord - mobiledeviceapplications - end
                                 }

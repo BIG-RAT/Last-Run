@@ -71,7 +71,8 @@ class ViewController: NSViewController {
         password   = passwd_TextField.stringValue
         let creds  = "\(username):\(password)"
         b64Creds   = creds.data(using: .utf8)?.base64EncodedString() ?? ""
-
+        jamfProServer.validToken["source"] = false
+ 
         checkPolicies = (policies_button.state.rawValue == 1) ? true:false
         checkCompCPs  = (ccp_button.state.rawValue == 1) ? true:false
         checkCompApps = (cApps_button.state.rawValue == 1) ? true:false
