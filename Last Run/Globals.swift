@@ -10,14 +10,55 @@ import Foundation
 let httpSuccess            = 200...299
 var refreshInterval:UInt32 = 20*60  // 20 minutes
 var runComplete            = false
-let userDefaults           = UserDefaults.standard
+let defaults               = UserDefaults.standard
+var useApiClient           = 0
+var appsGroupId            = "group.PS2F6S478M.jamfie.SharedJPMA"
+var didRun                 = false
+var saveServers            = true
+var maxServerList          = 20
+let sharedDefaults         = UserDefaults(suiteName: appsGroupId)
+let sharedContainerUrl     = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appsGroupId)
+let sharedSettingsPlistUrl = (sharedContainerUrl?.appendingPathComponent("Library/Preferences/\(appsGroupId).plist"))!
 
 
-struct appInfo {
-    static let dict            = Bundle.main.infoDictionary!
-    static let version         = dict["CFBundleShortVersionString"] as! String
-    static let name            = dict["CFBundleExecutable"] as! String
-    static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(appInfo.version)"
+struct AppInfo {
+    static let dict          = Bundle.main.infoDictionary!
+    static let version       = dict["CFBundleShortVersionString"] as! String
+    static let build         = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
+    static let name          = dict["CFBundleExecutable"] as! String
+    
+    static let appSupport    = NSHomeDirectory() + "/Library/Application Support/"
+    static let bookmarksPath = NSHomeDirectory() + "/Library/Application Support/bookmarks/"
+    static let volumes       = NSHomeDirectory() + "/Volumes"
+
+    static let userAgentHeader = "\(String(describing: name.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!))/\(AppInfo.version)"
+}
+
+struct JamfProServer {
+    static var mask         = false
+    static var majorVersion = ["source":0, "destination":0]
+    static var minorVersion = ["source":0, "destination":0]
+    static var patchVersion = ["source":0, "destination":0]
+    static var build        = ["source":"", "destination":""]
+    static var accessToken  = ["source":"", "destination":""]
+    static var base64Creds  = ["source":"", "destination":""]
+    static var authExpires:[String:Double]  = ["source":20.0, "destination":20.0]
+    static var authType     = ["source":"Bearer", "destination":"Bearer"]
+    static var currentCred  = ["source":"", "destination":""]               // used if we want to auth with a different account / string used to generate token
+    static var validToken   = ["source":false, "destination":false]
+    static var version      = ["source":"", "destination":""]
+    static var tokenCreated = ["source": Date(), "destination": Date()]
+    static var username     = ["source":"", "destination":""]
+    static var password     = ["source":"", "destination":""]
+    static var dpType       = ["source":"", "destination":""]
+    static var saveCreds    = ["source":0, "destination":0]
+    static var useApiClient = ["source":0, "destination":0]
+    static var url          = ["source":"", "destination":""]
+    
+    static var bucket       = ["source":"", "destination":""]
+    static var accessKey    = ["source":"", "destination":""]
+    static var secret       = ["source":"", "destination":""]
+    static var region       = ["source":"", "destination":""]
 }
 
 struct jamfProVersion {
@@ -109,20 +150,18 @@ func leadingZero(value: Int) -> String {
     return formattedValue
 }
 
-public func timeDiff(forWhat: String) -> (Int,Int,Int) {
-    var components:DateComponents?
-    switch forWhat {
-    case "runTime":
-        components = Calendar.current.dateComponents([.second, .nanosecond], from: history.startTime, to: Date())
-    case "sourceTokenAge","destTokenAge":
-        let whichServer = (forWhat == "sourceTokenAge") ? "source":"dsstination"
-        components = Calendar.current.dateComponents([.second, .nanosecond], from: (jamfProServer.tokenCreated[whichServer] ?? Date())!, to: Date())
-    default:
-        break
-    }
-    
-    let timeDifference = Int(components?.second! ?? 0)
-    let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
-    let (m,s) = r.quotientAndRemainder(dividingBy: 60)
-    return(h,m,s)
+public func timeDiff(startTime: Date) -> (Int, Int, Int, Double) {
+    let endTime = Date()
+//                    let components = Calendar.current.dateComponents([.second, .nanosecond], from: startTime, to: endTime)
+//                    let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
+//                    WriteToLog.shared.message(stringOfText: "[ViewController.download] time difference: \(timeDifference) seconds")
+    let components = Calendar.current.dateComponents([
+        .hour, .minute, .second, .nanosecond], from: startTime, to: endTime)
+    var diffInSeconds = Double(components.hour!)*3600 + Double(components.minute!)*60 + Double(components.second!) + Double(components.nanosecond!)/1000000000
+    diffInSeconds = Double(round(diffInSeconds * 1000) / 1000)
+//    let timeDifference = Int(components.second!) //+ Double(components.nanosecond!)/1000000000
+//    let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
+//    let (m,s) = r.quotientAndRemainder(dividingBy: 60)
+//    WriteToLog.shared.message(stringOfText: "[ViewController.download] download time: \(h):\(m):\(s) (h:m:s)")
+    return (Int(components.hour!), Int(components.minute!), Int(components.second!), diffInSeconds)
 }

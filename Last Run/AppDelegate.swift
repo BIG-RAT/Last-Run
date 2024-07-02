@@ -19,7 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let logFiles = [URL(fileURLWithPath: Log.path!.appending("/LastRun.log"))]
                     NSWorkspace.shared.activateFileViewerSelecting(logFiles)
         } else {
-            _ = Alert().display(header: "Alert", message: "There are currently no log files to display.", secondButton: "")
+            _ = Alert.shared.display(header: "Alert", message: "There are currently no log files to display.", secondButton: "")
         }
     }
 

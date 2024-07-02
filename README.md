@@ -1,5 +1,8 @@
 # Last Run 
 
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/BIG-RAT/Last-Run?display_name=tag) ![GitHub all releases](https://img.shields.io/github/downloads/BIG-RAT/Last-Run/total) ![GitHub latest release](https://img.shields.io/github/downloads/BIG-RAT/Last-Run/latest/total)
+ ![GitHub issues](https://img.shields.io/github/issues-raw/BIG-RAT/Last-Run) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/BIG-RAT/Last-Run) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/BIG-RAT/Last-Run) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/BIG-RAT/Last-Run)
+
 Download: [Last Run](https://github.com/BIG-RAT/Last-Run/releases/latest/download/Last.Run.zip)
 
 ![alt text](./images/app.png "Last Run")
@@ -15,6 +18,8 @@ Once the search is complete results will be displayed in a separate window.  Res
 Application log can quickly be accessed from the menu bar, View --> Show Logs or ⌘ L.
 
 ## History
+
+- 2024-07-02 v0.7.0: Updated to support bearer token.
 
 - 2023-04-08 v0.6.0: Include objects with no run data.
 

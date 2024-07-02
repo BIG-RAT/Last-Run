@@ -8,12 +8,23 @@
 import Foundation
 
 extension String {
+    var baseUrl: String {
+        get {
+            let tmpArray: [Any] = self.components(separatedBy: "/")
+            if tmpArray.count > 2 {
+                if let serverUrl = tmpArray[2] as? String {
+                    return "\(tmpArray[0])//\(serverUrl)"
+                }
+            }
+            return ""
+        }
+    }
     var fqdnFromUrl: String {
         get {
             var fqdn = ""
-            let nameArray = self.components(separatedBy: "://")
-            if nameArray.count > 1 {
-                fqdn = nameArray[1]
+            let nameArray = self.components(separatedBy: "/")
+            if nameArray.count > 2 {
+                fqdn = nameArray[2]
             } else {
                 fqdn =  self
             }

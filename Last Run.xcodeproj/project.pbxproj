@@ -11,7 +11,6 @@
 		B5FD9DBE275081550044C321 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DBD275081550044C321 /* ViewController.swift */; };
 		B5FD9DC02750815C0044C321 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5FD9DBF2750815C0044C321 /* Assets.xcassets */; };
 		B5FD9DC32750815C0044C321 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B5FD9DC12750815C0044C321 /* Main.storyboard */; };
-		B5FD9DCB275082B60044C321 /* Credentials2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DCA275082B60044C321 /* Credentials2.swift */; };
 		B5FD9DCD2750835A0044C321 /* ApiCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DCC2750835A0044C321 /* ApiCall.swift */; };
 		B5FD9DCF2750839B0044C321 /* WriteToLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DCE2750839B0044C321 /* WriteToLog.swift */; };
 		B5FD9DD1275083CE0044C321 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DD0275083CE0044C321 /* Globals.swift */; };
@@ -19,6 +18,8 @@
 		B5FD9DD5275085030044C321 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DD4275085030044C321 /* Extensions.swift */; };
 		B5FD9DD72751DF590044C321 /* LastRun.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DD62751DF590044C321 /* LastRun.swift */; };
 		B5FD9DD92751FBD70044C321 /* ResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DD82751FBD70044C321 /* ResultVC.swift */; };
+		CE362F5F2C334F1C00EC3006 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE362F5E2C334F1C00EC3006 /* Credentials.swift */; };
+		CE362F612C334F9300EC3006 /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE362F602C334F9300EC3006 /* LoginVC.swift */; };
 		CE53392029563B9F0018E14D /* TokenDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE53391F29563B9F0018E14D /* TokenDelegate.swift */; };
 		CE53392229565F270018E14D /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE53392129565F270018E14D /* Alert.swift */; };
 /* End PBXBuildFile section */
@@ -30,7 +31,6 @@
 		B5FD9DBF2750815C0044C321 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B5FD9DC22750815C0044C321 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B5FD9DC42750815C0044C321 /* Last_Run.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Last_Run.entitlements; sourceTree = "<group>"; };
-		B5FD9DCA275082B60044C321 /* Credentials2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Credentials2.swift; sourceTree = "<group>"; };
 		B5FD9DCC2750835A0044C321 /* ApiCall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ApiCall.swift; sourceTree = "<group>"; };
 		B5FD9DCE2750839B0044C321 /* WriteToLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WriteToLog.swift; sourceTree = "<group>"; };
 		B5FD9DD0275083CE0044C321 /* Globals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
@@ -38,6 +38,8 @@
 		B5FD9DD4275085030044C321 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		B5FD9DD62751DF590044C321 /* LastRun.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastRun.swift; sourceTree = "<group>"; };
 		B5FD9DD82751FBD70044C321 /* ResultVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultVC.swift; sourceTree = "<group>"; };
+		CE362F5E2C334F1C00EC3006 /* Credentials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
+		CE362F602C334F9300EC3006 /* LoginVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		CE53391F29563B9F0018E14D /* TokenDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenDelegate.swift; sourceTree = "<group>"; };
 		CE53392129565F270018E14D /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -77,9 +79,10 @@
 				B5FD9DCC2750835A0044C321 /* ApiCall.swift */,
 				B5FD9DD4275085030044C321 /* Extensions.swift */,
 				B5FD9DBB275081550044C321 /* AppDelegate.swift */,
-				B5FD9DCA275082B60044C321 /* Credentials2.swift */,
+				CE362F5E2C334F1C00EC3006 /* Credentials.swift */,
 				B5FD9DD0275083CE0044C321 /* Globals.swift */,
 				B5FD9DD62751DF590044C321 /* LastRun.swift */,
+				CE362F602C334F9300EC3006 /* LoginVC.swift */,
 				B5FD9DD82751FBD70044C321 /* ResultVC.swift */,
 				B5FD9DD22750842F0044C321 /* TimeDelegate.swift */,
 				CE53391F29563B9F0018E14D /* TokenDelegate.swift */,
@@ -193,9 +196,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5FD9DD3275084300044C321 /* TimeDelegate.swift in Sources */,
-				B5FD9DCB275082B60044C321 /* Credentials2.swift in Sources */,
+				CE362F612C334F9300EC3006 /* LoginVC.swift in Sources */,
 				B5FD9DBE275081550044C321 /* ViewController.swift in Sources */,
 				B5FD9DD5275085030044C321 /* Extensions.swift in Sources */,
+				CE362F5F2C334F1C00EC3006 /* Credentials.swift in Sources */,
 				B5FD9DD1275083CE0044C321 /* Globals.swift in Sources */,
 				CE53392029563B9F0018E14D /* TokenDelegate.swift in Sources */,
 				CE53392229565F270018E14D /* Alert.swift in Sources */,
@@ -345,11 +349,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Last Run/Last_Run.entitlements";
 				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = PS2F6S478M;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -360,8 +365,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.6.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.jamfpse.Last-Run";
+				MARKETING_VERSION = 0.7.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jamfpse.lastrun;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -375,11 +380,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Last Run/Last_Run.entitlements";
 				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = PS2F6S478M;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -390,8 +396,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.6.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.jamfpse.Last-Run";
+				MARKETING_VERSION = 0.7.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jamfpse.lastrun;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

@@ -71,10 +71,10 @@ class ResultVC: NSViewController {
                         try exportFileOp.write(contentsOf: "\(currentRow)\n".data(using:String.Encoding.utf8)!)
                     }
                     try exportFileOp.close()
-                    _ = Alert().display(header: "Attention:", message: "Results exported to ~/Downloads/\(exportFile)", secondButton: "")
+                    _ = Alert.shared.display(header: "Attention:", message: "Results exported to ~/Downloads/\(exportFile)", secondButton: "")
                 }
             } catch {
-                WriteToLog().message(stringOfText: "error writing \(currentRow) to \(exportURL)")
+                WriteToLog.shared.message(stringOfText: "error writing \(currentRow) to \(exportURL)")
             }
         }
     }

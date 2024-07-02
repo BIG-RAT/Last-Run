@@ -9,6 +9,9 @@ import Foundation
 
 class LastRun {
     
+    static let shared = LastRun()
+    private init() { }
+    
     var computerList     = [[String:Any]]()
     var mobiledeviceList = [[String:Any]]()
     var objectLastRun    = [String:[String:Int]]()
@@ -24,12 +27,12 @@ class LastRun {
         
         resultsDict.removeAll()
         // get list of computers
-            ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: theEndpoint, skip: !(checkPolicies || checkCompCPs || checkCompApps)) { [self]
+            ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: theEndpoint, skip: !(checkPolicies || checkCompCPs || checkCompApps)) { [self]
             (result: [String:AnyObject]) in
 //                print("computers: \(result)")
             if result.count > 0 {
                 computerList = result["computers"] as! [[String:Any]]
-                WriteToLog().message(stringOfText: "found \(computerList.count) policies")
+                WriteToLog.shared.message(stringOfText: "found \(computerList.count) policies")
                 
                 var counter = 0
                 objectLastRun["policy"] = [:]
@@ -41,8 +44,8 @@ class LastRun {
                     let computerID = computer["id"] as! Int
 //                    print("computerID: \(computerID)")
                     
-                    WriteToLog().message(stringOfText: "checking computer id \(computerID)'s history")
-                    ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: "computerhistory/id/\(computerID)", skip: false) { [self]
+                    WriteToLog.shared.message(stringOfText: "checking computer id \(computerID)'s history")
+                    ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "computerhistory/id/\(computerID)", skip: false) { [self]
                         (result: [String:AnyObject]) in
                         counter += 1
                         let computerHistory = result["computer_history"] as? [String:Any]
@@ -89,7 +92,7 @@ class LastRun {
                         
                         if counter == computerList.count {
 //                            if checkPolicies {
-                                ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: "policies", skip: !checkPolicies) { [self]
+                                ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "policies", skip: !checkPolicies) { [self]
                                     (result: [String:AnyObject]) in
 //                                    print("computers: \(result)")
                                     var usedPolicyIDs = [String]()
@@ -117,7 +120,7 @@ class LastRun {
 //                                        print("resultsDict for policies: \(resultsDict)")
                                     }
                                     // find policies that haven't run
-                                    WriteToLog().message(stringOfText: "scanning for policies with no last run information")
+                                    WriteToLog.shared.message(stringOfText: "scanning for policies with no last run information")
                                     for (policyId, policyName) in policy.idName {
                                         if usedPolicyIDs.firstIndex(of: policyId) == nil {
                                             resultsDict["policy"]!["\(policyName)  (\(policyId))"] = ""
@@ -126,8 +129,8 @@ class LastRun {
                                     var commandType = ""
     //                                print("objectLastRun[\"ccp\"]: \(String(describing: objectLastRun["ccp"]!))")
                                     var compProfilesArray = [String]()
-                                    WriteToLog().message(stringOfText: "scanning for computer configuration profiles that haven't run")
-                                    ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: "osxconfigurationprofiles", skip: !checkCompCPs) { [self]
+                                    WriteToLog.shared.message(stringOfText: "scanning for computer configuration profiles that haven't run")
+                                    ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "osxconfigurationprofiles", skip: !checkCompCPs) { [self]
                                         (result: [String:AnyObject]) in
     //                                    print("computers: \(result)")
                                         var allProfiles = [String]()
@@ -135,7 +138,7 @@ class LastRun {
 //                                        if result.count > 0 || checkCompApps {
                                             if result.count > 0 {
                                                 let arrayOfProfiles = result["os_x_configuration_profiles"] as! [[String:Any]]
-                                                WriteToLog().message(stringOfText: "found \(arrayOfProfiles.count) computer configuration profiles")
+                                                WriteToLog.shared.message(stringOfText: "found \(arrayOfProfiles.count) computer configuration profiles")
                                                 if arrayOfProfiles.count > 0 {
                                                     for theProfile in arrayOfProfiles {
                                                         allProfiles.append("\(String(describing: theProfile["name"]!))")
@@ -190,12 +193,12 @@ class LastRun {
                                                 }
                                             }
                                             // fetch all Mac Apps
-                                            WriteToLog().message(stringOfText: "scanning for Mac Apps that haven't run")
-                                            ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: "macapplications", skip: !checkCompApps) { [self]
+                                            WriteToLog.shared.message(stringOfText: "scanning for Mac Apps that haven't run")
+                                            ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "macapplications", skip: !checkCompApps) { [self]
                                                 (result: [String:AnyObject]) in
                                                 //                                    print("computers: \(result)")
                                                 
-                                                WriteToLog().message(stringOfText: "found \(result.count) Mac Apps")
+                                                WriteToLog.shared.message(stringOfText: "found \(result.count) Mac Apps")
                                                 if result.count > 0 && checkCompApps {
                                                     let arrayOfMacApps = result["mac_applications"] as! [[String:Any]]
                                                     if arrayOfMacApps.count > 0 {
@@ -215,7 +218,7 @@ class LastRun {
                                 }
 //                            }
                         }   // if counter == computerList.count - end
-                    }   // ApiCall().getRecord - computerId - end
+                    }   // ApiCall.shared.getRecord - computerId - end
                 }   // for computer in computerList - end
             } else {  // if result.count > 0 - end
                 completion(resultsDict)
@@ -227,7 +230,7 @@ class LastRun {
         
         resultsDict.removeAll()
         // get list of mobile device
-            ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: "mobiledevices", skip: !(checkMDCPs || checkMDApps)) { [self]
+            ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "mobiledevices", skip: !(checkMDCPs || checkMDApps)) { [self]
                 (mobiledevices: [String:AnyObject]) in
 //                print("mobile devices: \(result)")
                 var commandType = ""
@@ -241,7 +244,7 @@ class LastRun {
                     for device in mobiledeviceList {
                         let deviceId = device["id"] as! Int
 //                        print("deviceId: \(deviceId)")
-                        ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: "mobiledevicehistory/id/\(deviceId)", skip: false) { [self]
+                        ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "mobiledevicehistory/id/\(deviceId)", skip: false) { [self]
                             (mdh: [String:AnyObject]) in
                             deviceCounter += 1
                             let mobiledeviceHistory = mdh["mobile_device_history"] as? [String:Any]
@@ -271,7 +274,7 @@ class LastRun {
                             if deviceCounter == mobiledeviceList.count {
     //                            print("objectLastRun[\"mdcp\"]: \(String(describing: objectLastRun["mdcp"]))")
                                 var mdProfilesArray = [String]()
-                                ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: "mobiledeviceconfigurationprofiles", skip: !checkMDCPs) { [self]
+                                ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "mobiledeviceconfigurationprofiles", skip: !checkMDCPs) { [self]
                                     (mdcp: [String:AnyObject]) in
                                     
                                     var allProfiles = [String]()
@@ -320,7 +323,7 @@ class LastRun {
                                     
                                     // check mobile device App Store Apps
                                     var mdAppsArray = [String]()
-                                    ApiCall().getRecord(theServer: jamfServer, base64Creds: b64Creds, theEndpoint: "mobiledeviceapplications", skip: !checkMDApps) { [self]
+                                    ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "mobiledeviceapplications", skip: !checkMDApps) { [self]
                                         (mobileDevceApps: [String:AnyObject]) in
     //                                    print("mobile devices: \(result)")
                                         var allMobileApps = [String]()
@@ -371,7 +374,7 @@ class LastRun {
                                         }
                                         
                                         completion(resultsDict)
-                                    }   // ApiCall().getRecord - mobiledeviceapplications - end
+                                    }   // ApiCall.shared.getRecord - mobiledeviceapplications - end
                                 }
                             }
                         }
