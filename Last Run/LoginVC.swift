@@ -90,14 +90,14 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             displayName_Label.stringValue = "Server:"
             selectServer_Button.isHidden = false
             displayName_TextField.isHidden = true
-            serverURL_Label.isHidden = false
-            jamfProServer_textfield.isHidden = false
-            jamfProServer_textfield.isEditable = false
             hideCreds_button.isHidden = false
             displayName_TextField.stringValue = selectedServer_ButtonCell.title
             jamfProServer_textfield.stringValue = (availableServersDict[selectedServer_ButtonCell.title]?["server"])! as! String
             print("[LoginVC.selectServer_Action] call credentialsCheck")
             credentialsCheck()
+            if jamfProUsername_textfield.stringValue.isEmpty || jamfProPassword_textfield.stringValue.isEmpty {
+                setWindowSize(setting: 2)
+            }
             quit_Button.title  = "Quit"
             login_Button.title = "Login"
             
@@ -162,12 +162,12 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             theSender = sender as! String
         }
 //        print("[login_action] sender: \(theSender)")
-//        if theSender == "Add" {
-            JamfProServer.url[whichServer]      = jamfProServer_textfield.stringValue
-            JamfProServer.username[whichServer] = jamfProUsername_textfield.stringValue
-            JamfProServer.password[whichServer] = jamfProPassword_textfield.stringValue
-//        }
-//        print("[login_action] destination: \(JamfProServer.url)")
+
+        JamfProServer.url[whichServer]      = jamfProServer_textfield.stringValue
+        JamfProServer.username[whichServer] = jamfProUsername_textfield.stringValue
+        JamfProServer.password[whichServer] = jamfProPassword_textfield.stringValue
+
+        //        print("[login_action] destination: \(JamfProServer.url)")
 //        print("[login_action] username: \(JamfProServer.username)")
 //        print("[login_action] userpass: \(JamfProServer.password)")
         
@@ -244,6 +244,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
                     dismiss(self)
                     
                 } else {
+                    spinner_PI.stopAnimation(self)
                     return
                 }
             }
@@ -661,11 +662,12 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
                 credentialsCheck()
             }
         } else {
-            jamfProServer_textfield.stringValue = ""
             setSelectServerButton(listOfServers: [])
             selectServer_Button.selectItem(withTitle: "Add Server...")
             login_Button.title = "Add"
             selectServer_Action(self)
+        }
+        if jamfProServer_textfield.stringValue.isEmpty || jamfProUsername_textfield.stringValue.isEmpty || jamfProPassword_textfield.stringValue.isEmpty {
             setWindowSize(setting: 2)
         }
         // bring app to foreground

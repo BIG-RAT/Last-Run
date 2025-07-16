@@ -119,15 +119,15 @@ class WriteToLog {
                 print("failed to create log file at \(Log.path!)\(Log.file)")
             }
         }
-            logCleanup() {
-                (result: String) in
-                let logString = "\(self.logDate()) \(stringOfText)\n"
+        logCleanup() {
+            (result: String) in
+            let logString = "\(self.logDate()) \(stringOfText)\n"
 
-                self.logFileW?.seekToEndOfFile()
+            self.logFileW?.seekToEndOfFile()
 
-                let logText = (logString as NSString).data(using: String.Encoding.utf8.rawValue)
-                self.logFileW?.write(logText!)
-            }
+            let logText = (logString as NSString).data(using: String.Encoding.utf8.rawValue)
+            self.logFileW?.write(logText!)
+        }
     }
     
     func getCurrentTime() -> String {

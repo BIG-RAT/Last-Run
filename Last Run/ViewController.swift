@@ -7,11 +7,24 @@
 
 import Cocoa
 
-class ViewController: NSViewController, SendLoginInfoDelegate {
+protocol UpdateProgressDelegate {
+    func updateProgress(label: String, progress: Double)
+}
+
+class ViewController: NSViewController, SendLoginInfoDelegate, UpdateProgressDelegate {
     
     func sendLoginInfo(loginInfo: (String, String, String, String, Int)) {
             print("[ViewController] loginInfo: \(loginInfo)")
         jamfServer_TextField.stringValue = loginInfo.1.fqdnFromUrl
+    }
+    
+    func updateProgress(label: String, progress: Double) {
+        print("[ViewController] updateProgress: \(label), \(progress) %")
+        if label == "Computers" {
+            computersProgress_PI.doubleValue = progress
+        } else {
+            devicesProgress_PI.doubleValue = progress
+        }
     }
     
     let fm = FileManager()
@@ -19,9 +32,9 @@ class ViewController: NSViewController, SendLoginInfoDelegate {
     let prefsPath = URL(fileURLWithPath: NSHomeDirectory() + "/Library/Application Support/Last Run/settings.plist")
 
     @IBOutlet weak var jamfServer_TextField: NSTextField!
-    @IBOutlet weak var uname_TextField: NSTextField!
-    @IBOutlet weak var passwd_TextField: NSSecureTextField!
-    @IBOutlet weak var saveCreds_button: NSButton!
+//    @IBOutlet weak var uname_TextField: NSTextField!
+//    @IBOutlet weak var passwd_TextField: NSSecureTextField!
+//    @IBOutlet weak var saveCreds_button: NSButton!
     
     @IBOutlet var policies_button: NSButton!
     @IBOutlet var ccp_button: NSButton!
@@ -31,6 +44,10 @@ class ViewController: NSViewController, SendLoginInfoDelegate {
     
     
     @IBOutlet var spinner_progress: NSProgressIndicator!
+    @IBOutlet weak var computersProgress_PI: NSProgressIndicator!
+    @IBOutlet weak var devicesProgress_PI: NSProgressIndicator!
+    
+    
     @IBOutlet var search_button: NSButton!
     
     var jamfServer       = ""
@@ -94,9 +111,7 @@ class ViewController: NSViewController, SendLoginInfoDelegate {
                 if theResult == "success" {
                     defaults.set(jamfServer, forKey: "server")
                     defaults.set(username, forKey: "username")
-//                    if saveCreds_button.state.rawValue == 1 {
-//                        Credentials.shared.save(service: "lastrun-\(jamfServer.fqdnFromUrl)", account: username, credential: password)
-//                    }
+                    
                     LastRun.shared.computers(jamfServer: jamfServer, b64Creds: b64Creds, theEndpoint: "computers", checkPolicies: checkPolicies, checkCompCPs: checkCompCPs, checkCompApps: checkCompApps) { [self]
                         (computerHistory: [String:[String:String]]) in
                         LastRun.shared.devices(jamfServer: jamfServer, b64Creds: b64Creds, theEndpoint: "mobiledevices", checkMDCPs: checkMDCPs, checkMDApps: checkMDApps) { [self]
@@ -137,17 +152,8 @@ class ViewController: NSViewController, SendLoginInfoDelegate {
         // Do any additional setup after loading the view.
         WriteToLog.shared.createLogFile() {
             (result: String) in
-//            jamfServer_TextField.stringValue = defaults.string(forKey: "server") ?? ""
-//            uname_TextField.stringValue = defaults.string(forKey: "username") ?? ""
-//            saveCreds_button.state = NSControl.StateValue(defaults.integer(forKey: "saveCreds")) 
-//            if jamfServer_TextField.stringValue != "" {
-//                let credentialsArray = Credentials.shared.retrieve(service: "\(jamfServer_TextField.stringValue.fqdnFromUrl)", account: "\()")
-//                if credentialsArray.count == 2 {
-//                    uname_TextField.stringValue = credentialsArray[0]
-//                    passwd_TextField.stringValue = credentialsArray[1]
-//                }
-//            }
         }
+        LastRun.shared.updateProgressDelegate = self
     }
     
     override func viewDidAppear() {
