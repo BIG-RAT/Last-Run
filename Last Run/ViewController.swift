@@ -20,7 +20,7 @@ class ViewController: NSViewController, SendLoginInfoDelegate, UpdateProgressDel
     
     func updateProgress(label: String, progress: Double) {
         print("[ViewController] updateProgress: \(label), \(progress) %")
-        if label == "Computers" {
+        if label == "computers" {
             computersProgress_PI.doubleValue = progress
         } else {
             devicesProgress_PI.doubleValue = progress

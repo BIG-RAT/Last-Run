@@ -58,7 +58,7 @@ class TokenDelegate: NSObject, URLSessionDelegate {
             completion((500, "failed"))
             return
         }
-        //        print("[getToken] tokenUrl: \(tokenUrl!)")
+
         let configuration  = URLSessionConfiguration.ephemeral
         var request        = URLRequest(url: tokenUrl!)
         request.httpMethod = "POST"

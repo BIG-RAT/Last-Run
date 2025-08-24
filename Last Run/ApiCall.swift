@@ -9,7 +9,6 @@ import Cocoa
 
 class ApiCall: NSObject, URLSessionDelegate {
     
-    
     static let shared = ApiCall()
     private override init() { }
     
@@ -24,6 +23,9 @@ class ApiCall: NSObject, URLSessionDelegate {
             completion([:])
             return
         }
+        
+        // check token
+        
         let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
         WriteToLog.shared.message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)")
     

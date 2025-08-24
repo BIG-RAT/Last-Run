@@ -30,205 +30,245 @@ class LastRun {
     
     func computers(jamfServer: String, b64Creds: String, theEndpoint: String, checkPolicies: Bool, checkCompCPs: Bool, checkCompApps: Bool, completion: @escaping (_ result: [String:[String:String]]) -> Void) {
         
+        var computerCounter = 0
+        var policyCount = 0
+        var macAppcount = 0
+        var totalComputerCalls = 0
+        
+        var apiCounter = 0
+        
         resultsDict.removeAll()
         // get list of computers
-            ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: theEndpoint, skip: !(checkPolicies || checkCompCPs || checkCompApps)) { [self]
-            (result: [String:AnyObject]) in
-//                print("computers: \(result)")
-            if result.count > 0 {
-                computerList = result["computers"] as! [[String:Any]]
-                WriteToLog.shared.message(stringOfText: "found \(computerList.count) policies")
+        ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: theEndpoint, skip: !(checkPolicies || checkCompCPs || checkCompApps)) { [self]
+            (computerResult: [String:AnyObject]) in
+            computerCounter = computerResult.count
+            //                print("computers: \(computerResult)")
+            ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "policies", skip: !checkPolicies) { [self]
+                (policiesResult: [String:AnyObject]) in
                 
-                var counter = 0
-                objectLastRun["policy"] = [:]
-                objectLastRun["ccp"]    = [:]
-                resultsDict["policy"] = [:]
-                resultsDict["computerApp"] = [:]
-                resultsDict["ccp"] = [:]
-                for computer in computerList {
-                    let computerID = computer["id"] as! Int
-//                    print("computerID: \(computerID)")
+                policyCount = policiesResult.count
+                
+                var usedPolicyIDs = [String]()
+                if policiesResult.count > 0 {
+                    let arrayOfPolicies = policiesResult["policies"] as! [[String:Any]]
+                    if arrayOfPolicies.count > 0 {
+                        for thePolicy in arrayOfPolicies {
+                            if let thePolicyId = thePolicy["id"],
+                               let thePolicyName = thePolicy["name"] {
+                                //                                                if thePolicyId != "" && thePolicyName != "" {
+                                if "\(thePolicyName)".range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil && "\(thePolicyName)" != "Update Inventory" {
+                                    policy.idName["\(thePolicyId)"] = "\(thePolicyName)"
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                
+                if computerCounter > 0 {
+                    computerList = computerResult["computers"] as! [[String:Any]]
+                    WriteToLog.shared.message(stringOfText: "found \(computerList.count) policies")
                     
-                    WriteToLog.shared.message(stringOfText: "checking computer id \(computerID)'s history")
-                    ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "computerhistory/id/\(computerID)", skip: false) { [self]
-                        (result: [String:AnyObject]) in
-                        counter += 1
-                        let computerHistory = result["computer_history"] as? [String:Any]
+                    totalComputerCalls = computerList.count + policy.idName.count
+                    
+                    objectLastRun["policy"] = [:]
+                    objectLastRun["ccp"]    = [:]
+                    resultsDict["policy"] = [:]
+                    resultsDict["computerApp"] = [:]
+                    resultsDict["ccp"] = [:]
+                    for computer in computerList {
+                        let computerID = computer["id"] as! Int
+                        //                    print("computerID: \(computerID)")
                         
-                        if checkPolicies {
-//                            print("check policies")
-                            // find last run date for policies
-                            let policyLogs = computerHistory?["policy_logs"] as? [[String:Any]]
-//                            print("policyLogs: \(String(describing: policyLogs))")
-                            if policyLogs != nil {
-                                for log in policyLogs! {
-                                    let policyID = log["policy_id"] as! Int
-                                    let epoch    = log["date_completed_epoch"] as! Int // in milliseconds
-                                    if objectLastRun["policy"]?["\(policyID)"] != nil {
-                                        if epoch > (objectLastRun["policy"]?["\(policyID)"] ?? 0) as Int {
+                        WriteToLog.shared.message(stringOfText: "checking computer id \(computerID)'s history")
+                        ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "computerhistory/id/\(computerID)", skip: false) { [self]
+                            (result: [String:AnyObject]) in
+                            
+                            apiCounter += 1
+                            updateProgress(label: "computers", progress: Double(apiCounter)/Double(totalComputerCalls))
+                            
+                            let computerHistory = result["computer_history"] as? [String:Any]
+                            
+                            if checkPolicies {
+                                //                            print("check policies")
+                                // find last run date for policies
+                                let policyLogs = computerHistory?["policy_logs"] as? [[String:Any]]
+                                //                            print("policyLogs: \(String(describing: policyLogs))")
+                                if policyLogs != nil {
+                                    for log in policyLogs! {
+                                        let policyID = log["policy_id"] as! Int
+                                        let epoch    = log["date_completed_epoch"] as! Int // in milliseconds
+                                        if objectLastRun["policy"]?["\(policyID)"] != nil {
+                                            if epoch > (objectLastRun["policy"]?["\(policyID)"] ?? 0) as Int {
+                                                objectLastRun["policy"]?["\(policyID)"] = epoch
+                                            }
+                                        } else {
                                             objectLastRun["policy"]?["\(policyID)"] = epoch
                                         }
-                                    } else {
-                                        objectLastRun["policy"]?["\(policyID)"] = epoch
                                     }
                                 }
                             }
-                        }
-                        if checkCompCPs || checkCompApps {
-//                            print("check configuration profiles")
-                            // find last run date for computer configuration profiles
-                            let compProfileCommands = computerHistory?["commands"] as? [String:Any]
-                            let compProfilesCompleted = compProfileCommands?["completed"] as? [[String:Any]]
-//                            print("policyLogs: \(String(describing: policyLogs))")
-                            if compProfilesCompleted != nil {
-                                for command in compProfilesCompleted! {
-                                    let commandName = command["name"] as! String
-                                    let epoch    = command["completed_epoch"] as! Int // in milliseconds
-                                    if objectLastRun["ccp"]?["\(commandName)"] != nil {
-                                        if epoch > (objectLastRun["ccp"]?["\(commandName)"] ?? 0) as Int {
+                            if checkCompCPs || checkCompApps {
+                                //                            print("check configuration profiles")
+                                // find last run date for computer configuration profiles
+                                let compProfileCommands = computerHistory?["commands"] as? [String:Any]
+                                let compProfilesCompleted = compProfileCommands?["completed"] as? [[String:Any]]
+                                //                            print("policyLogs: \(String(describing: policyLogs))")
+                                if compProfilesCompleted != nil {
+                                    for command in compProfilesCompleted! {
+                                        let commandName = command["name"] as! String
+                                        let epoch    = command["completed_epoch"] as! Int // in milliseconds
+                                        if objectLastRun["ccp"]?["\(commandName)"] != nil {
+                                            if epoch > (objectLastRun["ccp"]?["\(commandName)"] ?? 0) as Int {
+                                                objectLastRun["ccp"]?["\(commandName)"] = epoch
+                                            }
+                                        } else {
                                             objectLastRun["ccp"]?["\(commandName)"] = epoch
                                         }
-                                    } else {
-                                        objectLastRun["ccp"]?["\(commandName)"] = epoch
                                     }
                                 }
                             }
-                        }
-                        if counter == computerList.count {
-//                            if checkPolicies {
-                                ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "policies", skip: !checkPolicies) { [self]
-                                    (result: [String:AnyObject]) in
-//                                    print("computers: \(result)")
-                                    var usedPolicyIDs = [String]()
-                                    if result.count > 0 {
-                                        let arrayOfPolicies = result["policies"] as! [[String:Any]]
-                                        if arrayOfPolicies.count > 0 {
-                                            for thePolicy in arrayOfPolicies {
-                                                if let thePolicyId = thePolicy["id"],
-                                                   let thePolicyName = thePolicy["name"] {
-    //                                                if thePolicyId != "" && thePolicyName != "" {
-                                                    if "\(thePolicyName)".range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil && "\(thePolicyName)" != "Update Inventory" {
-                                                        policy.idName["\(thePolicyId)"] = "\(thePolicyName)"
-                                                    }
-                                                }
-                                            }
-                                        }
-//                                    print("\nPolicies")
-                                        for (key, value) in objectLastRun["policy"]! {
-                                            if policy.idName[key] != nil {
-    //                                                print("\(String(describing: policy.idName[key]!)) (\(key))\t\t\(NSDate(timeIntervalSince1970:TimeInterval((value/1000))))")
-                                                usedPolicyIDs.append(key)
-                                                resultsDict["policy"]!["\(String(describing: policy.idName[key]!))  (\(key))"] = "\(NSDate(timeIntervalSince1970:TimeInterval((value/1000))))"
-                                            }
-                                        }
-//                                        print("resultsDict for policies: \(resultsDict)")
-                                    }
-                                    // find policies that haven't run
-                                    WriteToLog.shared.message(stringOfText: "scanning for policies with no last run information")
-                                    for (policyId, policyName) in policy.idName {
-                                        if usedPolicyIDs.firstIndex(of: policyId) == nil {
-                                            resultsDict["policy"]!["\(policyName)  (\(policyId))"] = ""
+                            if apiCounter == computerList.count {
+                                //                            ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "policies", skip: !checkPolicies) { [self]
+                                //                                (policiesResult: [String:AnyObject]) in
+                                //                                    print("computers: \(policiesResult)")
+//                                var usedPolicyIDs = [String]()
+                                if policiesResult.count > 0 {
+//                                    let arrayOfPolicies = policiesResult["policies"] as! [[String:Any]]
+//                                    if arrayOfPolicies.count > 0 {
+//                                        for thePolicy in arrayOfPolicies {
+//                                            if let thePolicyId = thePolicy["id"],
+//                                               let thePolicyName = thePolicy["name"] {
+//                                                //                                                if thePolicyId != "" && thePolicyName != "" {
+//                                                if "\(thePolicyName)".range(of:"[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] at", options: .regularExpression) == nil && "\(thePolicyName)" != "Update Inventory" {
+//                                                    policy.idName["\(thePolicyId)"] = "\(thePolicyName)"
+//                                                }
+//                                            }
+//                                        }
+//                                    }
+                                    //                                    print("\nPolicies")
+                                    for (key, value) in objectLastRun["policy"]! {
+                                        if policy.idName[key] != nil {
+                                            //                                                print("\(String(describing: policy.idName[key]!)) (\(key))\t\t\(NSDate(timeIntervalSince1970:TimeInterval((value/1000))))")
+                                            usedPolicyIDs.append(key)
+                                            resultsDict["policy"]!["\(String(describing: policy.idName[key]!))  (\(key))"] = "\(NSDate(timeIntervalSince1970:TimeInterval((value/1000))))"
                                         }
                                     }
-                                    var commandType = ""
-    //                                print("objectLastRun[\"ccp\"]: \(String(describing: objectLastRun["ccp"]!))")
-                                    var compProfilesArray = [String]()
-                                    WriteToLog.shared.message(stringOfText: "scanning for computer configuration profiles that haven't run")
-                                    ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "osxconfigurationprofiles", skip: !checkCompCPs) { [self]
-                                        (result: [String:AnyObject]) in
-    //                                    print("computers: \(result)")
-                                        var allProfiles = [String]()
-                                        
-                                        if result.count > 0 {
-                                            let arrayOfProfiles = result["os_x_configuration_profiles"] as! [[String:Any]]
-                                            WriteToLog.shared.message(stringOfText: "found \(arrayOfProfiles.count) computer configuration profiles")
-                                            if arrayOfProfiles.count > 0 {
-                                                for theProfile in arrayOfProfiles {
-                                                    allProfiles.append("\(String(describing: theProfile["name"]!))")
-                                                    compProfilesArray.append("Install Configuration Profile \(String(describing: theProfile["name"]!))")
-                                                    compProfilesArray.append("Remove Configuration Profile \(String(describing: theProfile["name"]!))")
-                                                }
-                                            }
-                                        }
-    //                                        print("compProfilesArray: \(compProfilesArray)")
-                                        var l_profileName = ""
-                                        var action = ""
-//                                        print("\nComputer Configuration Profiles")
-                                        for (key, value) in objectLastRun["ccp"]! {
-                                            if compProfilesArray.firstIndex(of: key) != nil || key.prefix(13) == "Install App -" {
-                                                action = ""
-                                                commandType = ""
-                                                let keyArray = key.components(separatedBy: " ")
-                                                if keyArray[0] == "Install" {
-                                                    action = " (Install)"
-                                                } else if keyArray[0] == "Remove" {
-                                                    action = " (Remove)"
-                                                }
-                                                if keyArray.count > 1 {
-                                                    switch keyArray[1] {
-                                                    case "App":
-                                                        if checkCompApps {
-                                                            commandType = "computerApp"
-                                                            l_profileName = key.replacingOccurrences(of: "Install App - ", with: "")
-                                                            l_profileName = l_profileName.replacingOccurrences(of: "Remove App - ", with: "")
-                                                        }
-                                                    case "Configuration":
-                                                        if checkCompCPs {
-                                                            commandType = "ccp"
-                                                            l_profileName = key.replacingOccurrences(of: "Install Configuration Profile ", with: "")
-                                                            l_profileName = l_profileName.replacingOccurrences(of: "Remove Configuration Profile ", with: "")
-                                                        }
-                                                    default:
-                                                        break
-                                                    }
-                                                }
-                                                l_profileName = "\(l_profileName)\(action)"
-    //                                            print("\(l_profileName)\t\t\(NSDate(timeIntervalSince1970:TimeInterval((value/1000))))")
-                                                if commandType != "" {
-                                                    resultsDict[commandType]!["\(l_profileName)"] = "\(NSDate(timeIntervalSince1970:TimeInterval((value/1000))))"
-                                                }
-                                            }
-                                        }
-                                        // search for profiles with no run info
-                                        for profileName in allProfiles {
-                                            if resultsDict["ccp"]!["\(profileName)"] == nil {
-                                                resultsDict["ccp"]!["\(profileName)"] = ""
-                                            }
-                                        }
-                                        // fetch all Mac Apps
-                                        WriteToLog.shared.message(stringOfText: "scanning for Mac Apps that haven't run")
-                                        ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "macapplications", skip: !checkCompApps) { [self]
-                                            (result: [String:AnyObject]) in
-                                            //                                    print("computers: \(result)")
-                                            
-                                            WriteToLog.shared.message(stringOfText: "found \(result.count) Mac Apps")
-                                            if result.count > 0 && checkCompApps {
-                                                let arrayOfMacApps = result["mac_applications"] as! [[String:Any]]
-                                                if arrayOfMacApps.count > 0 {
-                                                    for theMacApp in arrayOfMacApps {
-                                                        if let appName = theMacApp["name"] as? String {
-                                                            if resultsDict["computerApp"]!["\(appName)"] == nil {
-                                                                resultsDict["computerApp"]!["\(appName)"] = ""
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            completion(resultsDict)
-                                        }
+                                    //                                        print("resultsDict for policies: \(resultsDict)")
+                                }
+                                // find policies that haven't run
+                                WriteToLog.shared.message(stringOfText: "scanning for policies with no last run information")
+                                for (policyId, policyName) in policy.idName {
+                                    
+                                    apiCounter += 1
+                                    updateProgress(label: "computers", progress: Double(apiCounter)/Double(totalComputerCalls))
+                                    
+                                    if usedPolicyIDs.firstIndex(of: policyId) == nil {
+                                        resultsDict["policy"]!["\(policyName)  (\(policyId))"] = ""
                                     }
                                 }
-//                            }
-                        }   // if counter == computerList.count - end
-                    }   // ApiCall.shared.getRecord - computerId - end
-                }   // for computer in computerList - end
-            } else {  // if result.count > 0 - end
-                completion(resultsDict)
-            }
+                                var commandType = ""
+                                //                                print("objectLastRun[\"ccp\"]: \(String(describing: objectLastRun["ccp"]!))")
+                                var compProfilesArray = [String]()
+                                WriteToLog.shared.message(stringOfText: "scanning for computer configuration profiles that haven't run")
+                                ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "osxconfigurationprofiles", skip: !checkCompCPs) { [self]
+                                    (cpResult: [String:AnyObject]) in
+                                    //                                    print("computers: \(cpResult)")
+                                    var allProfiles = [String]()
+                                    
+                                    if cpResult.count > 0 {
+                                        let arrayOfProfiles = cpResult["os_x_configuration_profiles"] as! [[String:Any]]
+                                        WriteToLog.shared.message(stringOfText: "found \(arrayOfProfiles.count) computer configuration profiles")
+                                        if arrayOfProfiles.count > 0 {
+                                            for theProfile in arrayOfProfiles {
+                                                allProfiles.append("\(String(describing: theProfile["name"]!))")
+                                                compProfilesArray.append("Install Configuration Profile \(String(describing: theProfile["name"]!))")
+                                                compProfilesArray.append("Remove Configuration Profile \(String(describing: theProfile["name"]!))")
+                                            }
+                                        }
+                                    }
+                                    //                                        print("compProfilesArray: \(compProfilesArray)")
+                                    var l_profileName = ""
+                                    var action = ""
+                                    //                                        print("\nComputer Configuration Profiles")
+                                    for (key, value) in objectLastRun["ccp"]! {
+                                        if compProfilesArray.firstIndex(of: key) != nil || key.prefix(13) == "Install App -" {
+                                            action = ""
+                                            commandType = ""
+                                            let keyArray = key.components(separatedBy: " ")
+                                            if keyArray[0] == "Install" {
+                                                action = " (Install)"
+                                            } else if keyArray[0] == "Remove" {
+                                                action = " (Remove)"
+                                            }
+                                            if keyArray.count > 1 {
+                                                switch keyArray[1] {
+                                                case "App":
+                                                    if checkCompApps {
+                                                        commandType = "computerApp"
+                                                        l_profileName = key.replacingOccurrences(of: "Install App - ", with: "")
+                                                        l_profileName = l_profileName.replacingOccurrences(of: "Remove App - ", with: "")
+                                                    }
+                                                case "Configuration":
+                                                    if checkCompCPs {
+                                                        commandType = "ccp"
+                                                        l_profileName = key.replacingOccurrences(of: "Install Configuration Profile ", with: "")
+                                                        l_profileName = l_profileName.replacingOccurrences(of: "Remove Configuration Profile ", with: "")
+                                                    }
+                                                default:
+                                                    break
+                                                }
+                                            }
+                                            l_profileName = "\(l_profileName)\(action)"
+                                            //                                            print("\(l_profileName)\t\t\(NSDate(timeIntervalSince1970:TimeInterval((value/1000))))")
+                                            if commandType != "" {
+                                                resultsDict[commandType]!["\(l_profileName)"] = "\(NSDate(timeIntervalSince1970:TimeInterval((value/1000))))"
+                                            }
+                                        }
+                                    }
+                                    // search for profiles with no run info
+                                    for profileName in allProfiles {
+                                        if resultsDict["ccp"]!["\(profileName)"] == nil {
+                                            resultsDict["ccp"]!["\(profileName)"] = ""
+                                        }
+                                    }
+                                    // fetch all Mac Apps
+                                    WriteToLog.shared.message(stringOfText: "scanning for Mac Apps that haven't run")
+                                    ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "macapplications", skip: !checkCompApps) { [self]
+                                        (macAppsResult: [String:AnyObject]) in
+                                        //                                    print("computers: \(macAppsResult)")
+                                        
+                                        WriteToLog.shared.message(stringOfText: "found \(macAppsResult.count) Mac Apps")
+                                        if macAppsResult.count > 0 && checkCompApps {
+                                            let arrayOfMacApps = macAppsResult["mac_applications"] as! [[String:Any]]
+                                            if arrayOfMacApps.count > 0 {
+                                                for theMacApp in arrayOfMacApps {
+                                                    if let appName = theMacApp["name"] as? String {
+                                                        if resultsDict["computerApp"]!["\(appName)"] == nil {
+                                                            resultsDict["computerApp"]!["\(appName)"] = ""
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        completion(resultsDict)
+                                    }
+                                }
+                                //                            }
+                            }   // if counter == computerList.count - end
+                        }   // ApiCall.shared.getRecord - computerId - end
+                    }   // for computer in computerList - end
+                } else {  // if result.count > 0 - end
+                    completion(resultsDict)
+                }
+            } //close policies api call
         }
     }
     
     func devices(jamfServer: String, b64Creds: String, theEndpoint: String, checkMDCPs: Bool, checkMDApps: Bool, completion: @escaping (_ result: [String:[String:String]]) -> Void) {
+        
+        var deviceCount = 0
+        var devideAppount = 0
         
         resultsDict.removeAll()
         // get list of mobile device

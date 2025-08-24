@@ -69,6 +69,9 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
                                 availableServersDict[displayName] = nil
                                 selectServer_Button.removeItem(withTitle: selectedServer)
                                 sortedDisplayNames.removeAll(where: {$0 == displayName})
+                                if lastServer == selectedServer {
+                                    defaults.set("", forKey: "currentServer")
+                                }
                             }
                         }
                         if saveServers {
