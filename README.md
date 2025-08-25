@@ -19,6 +19,8 @@ Application log can quickly be accessed from the menu bar, View --> Show Logs or
 
 ## History
 
+- 2024-07-02 v0.8.0: UI updates. Better token handling.
+
 - 2024-07-02 v0.7.0: Updated to support bearer token.
 
 - 2023-04-08 v0.6.0: Include objects with no run data.
