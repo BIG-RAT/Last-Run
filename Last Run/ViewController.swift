@@ -14,12 +14,12 @@ protocol UpdateProgressDelegate {
 class ViewController: NSViewController, SendLoginInfoDelegate, UpdateProgressDelegate {
     
     func sendLoginInfo(loginInfo: (String, String, String, String, Int)) {
-            print("[ViewController] loginInfo: \(loginInfo)")
-        jamfServer_TextField.stringValue = loginInfo.1.fqdnFromUrl
+//        print("[ViewController] loginInfo: \(loginInfo)")
+        jamfServer_TextField.stringValue = loginInfo.0.fqdnFromUrl
     }
     
     func updateProgress(label: String, progress: Double) {
-        print("[ViewController] updateProgress: \(label), \(progress) %")
+//        print("[ViewController] updateProgress: \(label), \(progress) %")
         if label == "computers" {
             computersProgress_PI.doubleValue = progress
         } else {
@@ -89,13 +89,6 @@ class ViewController: NSViewController, SendLoginInfoDelegate, UpdateProgressDel
             objectLastRun.removeAll()
             resultsDict.removeAll()
             
-//            jamfServer = jamfServer_TextField.stringValue
-//            username   = uname_TextField.stringValue
-//            password   = passwd_TextField.stringValue
-//            let creds  = "\(username):\(password)"
-//            b64Creds   = creds.data(using: .utf8)?.base64EncodedString() ?? ""
-//            jamfProServer.validToken["source"] = false
-            
             checkPolicies = (policies_button.state.rawValue == 1) ? true:false
             checkCompCPs  = (ccp_button.state.rawValue == 1) ? true:false
             checkCompApps = (cApps_button.state.rawValue == 1) ? true:false
@@ -105,10 +98,13 @@ class ViewController: NSViewController, SendLoginInfoDelegate, UpdateProgressDel
             spinner_progress.startAnimation(self)
             search_button.isEnabled = false
             runComplete = false
-            TokenDelegate.shared.getToken(whichServer: "source", base64creds: JamfProServer.base64Creds["source"] ?? "") { [self]
-                authResult in
-                let (statusCode,theResult) = authResult
-                if theResult == "success" {
+            updateProgress(label: "computers", progress: Double(-1.0))
+            updateProgress(label: "devices", progress: Double(-1.0))
+            Task {
+                await TokenManager.shared.setToken(serverUrl: JamfProServer.url, username: JamfProServer.username.lowercased(), password: JamfProServer.password)
+                print("[search_action] Login getToken result: \(TokenManager.shared.tokenInfo?.authMessage ?? "")")
+                
+                if TokenManager.shared.tokenInfo?.authMessage ?? "" == "success" {
                     defaults.set(jamfServer, forKey: "server")
                     defaults.set(username, forKey: "username")
                     
@@ -125,7 +121,7 @@ class ViewController: NSViewController, SendLoginInfoDelegate, UpdateProgressDel
                         }
                     }
                 } else {
-                    _ = Alert.shared.display(header: "Attention:", message: "Failed to authenticate.  Status code: \(statusCode)", secondButton: "")
+                    _ = Alert.shared.display(header: "Attention:", message: "Failed to authenticate. \(TokenManager.shared.tokenInfo?.authMessage ?? "")", secondButton: "")
                     spinner_progress.stopAnimation(self)
                     search_button.isEnabled = true
                     runComplete = true

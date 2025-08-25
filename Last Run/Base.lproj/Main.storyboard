@@ -1015,7 +1015,7 @@ DQ
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <secureTextField focusRingType="none" verticalHuggingPriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="95f-nu-BMJ">
+                            <secureTextField focusRingType="none" verticalHuggingPriority="749" contentType="password" translatesAutoresizingMaskIntoConstraints="NO" id="95f-nu-BMJ">
                                 <rect key="frame" x="141" y="80" width="367" height="24"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="367" id="Ib7-Bh-dex"/>
@@ -1336,7 +1336,7 @@ Gw
                                 </tableHeaderView>
                             </scrollView>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="PJY-ez-hzH">
-                                <rect key="frame" x="17" y="19" width="214" height="22"/>
+                                <rect key="frame" x="17" y="19.5" width="214" height="22"/>
                                 <buttonCell key="cell" type="check" title="Hide objects with no date" bezelStyle="regularSquare" imagePosition="left" controlSize="large" inset="2" id="zLk-fd-WwL">
                                     <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                     <font key="font" metaFont="system" size="16"/>

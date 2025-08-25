@@ -67,7 +67,7 @@ class LastRun {
                 
                 if computerCounter > 0 {
                     computerList = computerResult["computers"] as! [[String:Any]]
-                    WriteToLog.shared.message(stringOfText: "found \(computerList.count) policies")
+                    WriteToLog.shared.message("found \(computerList.count) policies")
                     
                     totalComputerCalls = computerList.count + policy.idName.count
                     
@@ -80,7 +80,7 @@ class LastRun {
                         let computerID = computer["id"] as! Int
                         //                    print("computerID: \(computerID)")
                         
-                        WriteToLog.shared.message(stringOfText: "checking computer id \(computerID)'s history")
+                        WriteToLog.shared.message("checking computer id \(computerID)'s history")
                         ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "computerhistory/id/\(computerID)", skip: false) { [self]
                             (result: [String:AnyObject]) in
                             
@@ -157,7 +157,7 @@ class LastRun {
                                     //                                        print("resultsDict for policies: \(resultsDict)")
                                 }
                                 // find policies that haven't run
-                                WriteToLog.shared.message(stringOfText: "scanning for policies with no last run information")
+                                WriteToLog.shared.message("scanning for policies with no last run information")
                                 for (policyId, policyName) in policy.idName {
                                     
                                     apiCounter += 1
@@ -170,7 +170,7 @@ class LastRun {
                                 var commandType = ""
                                 //                                print("objectLastRun[\"ccp\"]: \(String(describing: objectLastRun["ccp"]!))")
                                 var compProfilesArray = [String]()
-                                WriteToLog.shared.message(stringOfText: "scanning for computer configuration profiles that haven't run")
+                                WriteToLog.shared.message("scanning for computer configuration profiles that haven't run")
                                 ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "osxconfigurationprofiles", skip: !checkCompCPs) { [self]
                                     (cpResult: [String:AnyObject]) in
                                     //                                    print("computers: \(cpResult)")
@@ -178,7 +178,7 @@ class LastRun {
                                     
                                     if cpResult.count > 0 {
                                         let arrayOfProfiles = cpResult["os_x_configuration_profiles"] as! [[String:Any]]
-                                        WriteToLog.shared.message(stringOfText: "found \(arrayOfProfiles.count) computer configuration profiles")
+                                        WriteToLog.shared.message("found \(arrayOfProfiles.count) computer configuration profiles")
                                         if arrayOfProfiles.count > 0 {
                                             for theProfile in arrayOfProfiles {
                                                 allProfiles.append("\(String(describing: theProfile["name"]!))")
@@ -233,12 +233,12 @@ class LastRun {
                                         }
                                     }
                                     // fetch all Mac Apps
-                                    WriteToLog.shared.message(stringOfText: "scanning for Mac Apps that haven't run")
+                                    WriteToLog.shared.message("scanning for Mac Apps that haven't run")
                                     ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "macapplications", skip: !checkCompApps) { [self]
                                         (macAppsResult: [String:AnyObject]) in
                                         //                                    print("computers: \(macAppsResult)")
                                         
-                                        WriteToLog.shared.message(stringOfText: "found \(macAppsResult.count) Mac Apps")
+                                        WriteToLog.shared.message("found \(macAppsResult.count) Mac Apps")
                                         if macAppsResult.count > 0 && checkCompApps {
                                             let arrayOfMacApps = macAppsResult["mac_applications"] as! [[String:Any]]
                                             if arrayOfMacApps.count > 0 {
@@ -282,6 +282,9 @@ class LastRun {
                 mobiledeviceList = mobiledevices["mobile_devices"] as! [[String:Any]]
                 
                 var deviceCounter = 0
+                let mobileApiCalls = mobiledeviceList.count + 2
+//                var completedApiCalls = 0
+                
                 objectLastRun["mdcp"]    = [:]
                 for device in mobiledeviceList {
                     let deviceId = device["id"] as! Int
@@ -289,6 +292,9 @@ class LastRun {
                     ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "mobiledevicehistory/id/\(deviceId)", skip: false) { [self]
                         (mdh: [String:AnyObject]) in
                         deviceCounter += 1
+                        
+                        updateProgress(label: "devices", progress: Double(deviceCounter)/Double(mobileApiCalls))
+                        
                         let mobiledeviceHistory = mdh["mobile_device_history"] as? [String:Any]
                         
                         if checkMDCPs || checkMDApps {
@@ -318,6 +324,9 @@ class LastRun {
                             var mdProfilesArray = [String]()
                             ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "mobiledeviceconfigurationprofiles", skip: !checkMDCPs) { [self]
                                 (mdcp: [String:AnyObject]) in
+                                deviceCounter += 1
+                                
+                                updateProgress(label: "devices", progress: Double(deviceCounter)/Double(mobileApiCalls))
                                 
                                 var allProfiles = [String]()
 //                                    print("mobile devices: \(result)")
@@ -369,6 +378,9 @@ class LastRun {
                                     (mobileDevceApps: [String:AnyObject]) in
 //                                    print("mobile devices: \(result)")
                                     var allMobileApps = [String]()
+                                    deviceCounter += 1
+                                    
+                                    updateProgress(label: "devices", progress: Double(deviceCounter)/Double(mobileApiCalls))
                                     
                                     if mobileDevceApps.count > 0 {
                                         let arrayOfApps = mobileDevceApps["mobile_device_applications"] as! [[String:Any]]

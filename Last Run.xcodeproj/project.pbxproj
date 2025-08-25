@@ -20,8 +20,9 @@
 		B5FD9DD92751FBD70044C321 /* ResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD9DD82751FBD70044C321 /* ResultVC.swift */; };
 		CE362F5F2C334F1C00EC3006 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE362F5E2C334F1C00EC3006 /* Credentials.swift */; };
 		CE362F612C334F9300EC3006 /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE362F602C334F9300EC3006 /* LoginVC.swift */; };
-		CE53392029563B9F0018E14D /* TokenDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE53391F29563B9F0018E14D /* TokenDelegate.swift */; };
 		CE53392229565F270018E14D /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE53392129565F270018E14D /* Alert.swift */; };
+		CE9721192E5AA1D900D45718 /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE9721182E5AA1D900D45718 /* Token.swift */; };
+		CE97211B2E5AA20800D45718 /* TokenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE97211A2E5AA20800D45718 /* TokenManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,8 +41,9 @@
 		B5FD9DD82751FBD70044C321 /* ResultVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultVC.swift; sourceTree = "<group>"; };
 		CE362F5E2C334F1C00EC3006 /* Credentials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
 		CE362F602C334F9300EC3006 /* LoginVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
-		CE53391F29563B9F0018E14D /* TokenDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenDelegate.swift; sourceTree = "<group>"; };
 		CE53392129565F270018E14D /* Alert.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
+		CE9721182E5AA1D900D45718 /* Token.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Token.swift; sourceTree = "<group>"; };
+		CE97211A2E5AA20800D45718 /* TokenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,7 +87,8 @@
 				CE362F602C334F9300EC3006 /* LoginVC.swift */,
 				B5FD9DD82751FBD70044C321 /* ResultVC.swift */,
 				B5FD9DD22750842F0044C321 /* TimeDelegate.swift */,
-				CE53391F29563B9F0018E14D /* TokenDelegate.swift */,
+				CE9721182E5AA1D900D45718 /* Token.swift */,
+				CE97211A2E5AA20800D45718 /* TokenManager.swift */,
 				B5FD9DBD275081550044C321 /* ViewController.swift */,
 				B5FD9DCE2750839B0044C321 /* WriteToLog.swift */,
 				B5FD9DBF2750815C0044C321 /* Assets.xcassets */,
@@ -196,12 +199,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5FD9DD3275084300044C321 /* TimeDelegate.swift in Sources */,
+				CE9721192E5AA1D900D45718 /* Token.swift in Sources */,
 				CE362F612C334F9300EC3006 /* LoginVC.swift in Sources */,
 				B5FD9DBE275081550044C321 /* ViewController.swift in Sources */,
 				B5FD9DD5275085030044C321 /* Extensions.swift in Sources */,
 				CE362F5F2C334F1C00EC3006 /* Credentials.swift in Sources */,
 				B5FD9DD1275083CE0044C321 /* Globals.swift in Sources */,
-				CE53392029563B9F0018E14D /* TokenDelegate.swift in Sources */,
+				CE97211B2E5AA20800D45718 /* TokenManager.swift in Sources */,
 				CE53392229565F270018E14D /* Alert.swift in Sources */,
 				B5FD9DD72751DF590044C321 /* LastRun.swift in Sources */,
 				B5FD9DBC275081550044C321 /* AppDelegate.swift in Sources */,
@@ -365,7 +369,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.7.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MARKETING_VERSION = 0.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jamfpse.lastrun;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -396,7 +401,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 0.7.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MARKETING_VERSION = 0.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jamfpse.lastrun;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

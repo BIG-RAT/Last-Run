@@ -110,7 +110,7 @@ class WriteToLog {
     }
     // func logCleanup - end
 
-    func message(stringOfText: String) {
+    func message(_ stringOfText: String) {
         if !fm.fileExists(atPath: Log.path!) {
             do {
                 try fm.createDirectory(atPath: Log.path!, withIntermediateDirectories: true, attributes: nil)

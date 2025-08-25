@@ -166,9 +166,9 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         }
 //        print("[login_action] sender: \(theSender)")
 
-        JamfProServer.url[whichServer]      = jamfProServer_textfield.stringValue
-        JamfProServer.username[whichServer] = jamfProUsername_textfield.stringValue
-        JamfProServer.password[whichServer] = jamfProPassword_textfield.stringValue
+        JamfProServer.url      = jamfProServer_textfield.stringValue
+        JamfProServer.username = jamfProUsername_textfield.stringValue
+        JamfProServer.password = jamfProPassword_textfield.stringValue
 
         //        print("[login_action] destination: \(JamfProServer.url)")
 //        print("[login_action] username: \(JamfProServer.username)")
@@ -217,30 +217,34 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
         }
         
         if theSender == "Login" {
-            JamfProServer.validToken[whichServer] = false
-            JamfProServer.url[whichServer]        = jamfProServer_textfield.stringValue.baseUrl
-            JamfProServer.username[whichServer]   = jamfProUsername_textfield.stringValue
+            JamfProServer.validToken = false
+            JamfProServer.url        = jamfProServer_textfield.stringValue.baseUrl
+            JamfProServer.username   = jamfProUsername_textfield.stringValue
+            JamfProServer.password   = jamfProPassword_textfield.stringValue
             
-            WriteToLog.shared.message(stringOfText: "[ViewController] Running AppName v\(AppInfo.version)")
+            WriteToLog.shared.message("[ViewController] Running AppName v\(AppInfo.version)")
             
             let jamfUtf8Creds = "\(jamfProUsername_textfield.stringValue):\(jamfProPassword_textfield.stringValue)".data(using: String.Encoding.utf8)
-            JamfProServer.base64Creds[whichServer] = (jamfUtf8Creds?.base64EncodedString())!
+            JamfProServer.base64Creds = (jamfUtf8Creds?.base64EncodedString())!
             
-            TokenDelegate.shared.getToken(whichServer: "source", base64creds: JamfProServer.base64Creds[whichServer] ?? "") { [self]
-                authResult in
-                let (statusCode,theResult) = authResult
-                print("[login_action] Login getToken result: \(authResult)")
+            Task {
+//            TokenDelegate.shared.getToken(whichServer: "source", base64creds: JamfProServer.base64Creds) { [self]
+//                authResult in
+//                let (statusCode,theResult) = authResult
+                await TokenManager.shared.setToken(serverUrl: JamfProServer.url, username: JamfProServer.username.lowercased(), password: JamfProServer.password)
+                print("[login_action] Login getToken result: \(TokenManager.shared.tokenInfo?.authMessage ?? "")")
                 
-                if theResult == "success" {
+                if TokenManager.shared.tokenInfo?.authMessage ?? "" == "success" {
+//                if theResult == "success" {
                     
-                    defaults.set(JamfProServer.url[whichServer], forKey: "currentServer")
-                    defaults.set(JamfProServer.username[whichServer], forKey: "username")
+                    defaults.set(JamfProServer.url, forKey: "currentServer")
+                    defaults.set(JamfProServer.username, forKey: "username")
                     
                     if saveCreds_button.state.rawValue == 1 {
                         Credentials.shared.save(service: "\(jamfProServer_textfield.stringValue.fqdnFromUrl)", account: jamfProUsername_textfield.stringValue, credential: jamfProPassword_textfield.stringValue)
                     }
                     
-                    let dataToBeSent = (selectServer_Button.titleOfSelectedItem!, JamfProServer.url[whichServer] ?? "", JamfProServer.username[whichServer] ?? "", "", saveCreds_button.state.rawValue)
+                    let dataToBeSent = (selectServer_Button.titleOfSelectedItem!, JamfProServer.url, JamfProServer.username, "", saveCreds_button.state.rawValue)
                     spinner_PI.stopAnimation(self)
                     print("[login_action] loginInfo: \(dataToBeSent)")
                     delegate?.sendLoginInfo(loginInfo: dataToBeSent)
@@ -264,26 +268,19 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             
             login_Button.isEnabled = false
             
-            if JamfProServer.url[whichServer]?.lowercased().prefix(4) != "http" {
-                jamfProServer_textfield.stringValue = "https://\(JamfProServer.url[whichServer]?.baseUrl ?? "")"
-                JamfProServer.url[whichServer] = jamfProServer_textfield.stringValue
+            if JamfProServer.url.lowercased().prefix(4) != "http" {
+                jamfProServer_textfield.stringValue = "https://\(JamfProServer.url.baseUrl)"
+                JamfProServer.url = jamfProServer_textfield.stringValue
             }
             
-            let jamfUtf8Creds = "\(JamfProServer.username[whichServer] ?? ""):\(JamfProServer.password[whichServer] ?? "")".data(using: String.Encoding.utf8)
-            JamfProServer.base64Creds[whichServer] = (jamfUtf8Creds?.base64EncodedString())!
-            TokenDelegate.shared.getToken(whichServer: "source", base64creds: JamfProServer.base64Creds[whichServer] ?? "") { [self]
-                authResult in
+            let jamfUtf8Creds = "\(JamfProServer.username):\(JamfProServer.password)".data(using: String.Encoding.utf8)
+            JamfProServer.base64Creds = (jamfUtf8Creds?.base64EncodedString())!
+            Task {
+                await TokenManager.shared.setToken(serverUrl: JamfProServer.url, username: JamfProServer.username.lowercased(), password: JamfProServer.password)
+                print("[login_action] Login getToken result: \(TokenManager.shared.tokenInfo?.authMessage ?? "")")
                 
-                login_Button.isEnabled = true
-                
-                let (statusCode,theResult) = authResult
-                if theResult == "success" {
+                if TokenManager.shared.tokenInfo?.authMessage ?? "" == "success" {
                     // invalidate token - todo
-//
-//                    header_TextField.isHidden          = true
-//                    header_TextField.wantsLayer        = true
-//                    header_TextField.stringValue       = ""
-//                    header_TextField.frame.size.height = 0.0
                     
                     sortedDisplayNames.append(displayName_TextField.stringValue)
                     while availableServersDict.count >= maxServerList {
@@ -324,7 +321,7 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
                     login_action("Login")
                 } else {
                     spinner_PI.stopAnimation(self)
-                    _ = Alert.shared.display(header: "Attention:", message: "Failed to generate token. HTTP status code: \(statusCode)", secondButton: "")
+                    _ = Alert.shared.display(header: "Attention:", message: "Failed to generate token. \(TokenManager.shared.tokenInfo?.authMessage ?? "")", secondButton: "")
                 }
             }
         }
@@ -501,9 +498,9 @@ class LoginVC: NSViewController, URLSessionDelegate, NSTextFieldDelegate {
             jamfProPassword_textfield.stringValue = ""
             setWindowSize(setting: 1)
         }
-        JamfProServer.url[whichServer]      = jamfProServer_textfield.stringValue
-        JamfProServer.username[whichServer] = jamfProUsername_textfield.stringValue
-        JamfProServer.password[whichServer] = jamfProPassword_textfield.stringValue
+        JamfProServer.url      = jamfProServer_textfield.stringValue
+        JamfProServer.username = jamfProUsername_textfield.stringValue
+        JamfProServer.password = jamfProPassword_textfield.stringValue
         
     }
     

@@ -8,7 +8,6 @@
 import Foundation
 
 let httpSuccess            = 200...299
-var refreshInterval:UInt32 = 20*60  // 20 minutes
 var runComplete            = false
 let defaults               = UserDefaults.standard
 var useApiClient           = 0
@@ -36,39 +35,15 @@ struct AppInfo {
 
 struct JamfProServer {
     static var mask         = false
-    static var majorVersion = ["source":0, "destination":0]
-    static var minorVersion = ["source":0, "destination":0]
-    static var patchVersion = ["source":0, "destination":0]
-    static var build        = ["source":"", "destination":""]
-    static var accessToken  = ["source":"", "destination":""]
-    static var base64Creds  = ["source":"", "destination":""]
-    static var authExpires:[String:Double]  = ["source":20.0, "destination":20.0]
-    static var authType     = ["source":"Bearer", "destination":"Bearer"]
-    static var currentCred  = ["source":"", "destination":""]               // used if we want to auth with a different account / string used to generate token
-    static var validToken   = ["source":false, "destination":false]
-    static var version      = ["source":"", "destination":""]
-    static var tokenCreated = ["source": Date(), "destination": Date()]
-    static var username     = ["source":"", "destination":""]
-    static var password     = ["source":"", "destination":""]
-    static var dpType       = ["source":"", "destination":""]
-    static var saveCreds    = ["source":0, "destination":0]
-    static var useApiClient = ["source":0, "destination":0]
-    static var url          = ["source":"", "destination":""]
-    
-    static var bucket       = ["source":"", "destination":""]
-    static var accessKey    = ["source":"", "destination":""]
-    static var secret       = ["source":"", "destination":""]
-    static var region       = ["source":"", "destination":""]
-}
-
-struct jamfProVersion {
-    static var major = 0
-    static var minor = 0
-    static var patch = 0
-}
-
-struct dependency {
-    static var wait = true
+    static var accessToken  = ""
+    static var base64Creds  = ""
+    static var authExpires:Double  = 20.0
+    static var authType     = "Bearer"
+    static var validToken   = false
+    static var tokenCreated = Date()
+    static var username     = ""
+    static var password     = ""
+    static var url          = ""
 }
 
 struct Log {
@@ -87,34 +62,6 @@ struct results {
 }
 struct history {
     static var startTime = Date()
-}
-
-struct jamfProServer {
-    static var majorVersion = 0
-    static var minorVersion = 0
-    static var patchVersion = 0
-    static var version      = ["source":"", "destination":""]
-    static var build        = ""
-    static var source       = ""
-    static var destination  = ""
-    static var whichServer  = ""
-    static var sourceUser   = ""
-    static var destUser     = ""
-    static var sourcePwd    = ""
-    static var destPwd      = ""
-    static var storeCreds   = 0
-    static var toSite       = false
-    static var destSite     = ""
-    static var importFiles  = 0
-    static var authCreds    = ["source":"", "destination":""]
-    static var authExpires  = ["source":"", "destination":""]
-    static var authType     = ["source":"Bearer", "destination":"Bearer"]
-    static var base64Creds  = ["source":"", "destination":""]
-    static var validToken   = ["source":false, "destination":false]
-    static var tokenCreated = [String:Date?]()
-    static var pkgsNotFound = 0
-    static var sessionCookie = [HTTPCookie]()
-    static var stickySession = false
 }
 
 struct policy {
@@ -154,7 +101,7 @@ public func timeDiff(startTime: Date) -> (Int, Int, Int, Double) {
     let endTime = Date()
 //                    let components = Calendar.current.dateComponents([.second, .nanosecond], from: startTime, to: endTime)
 //                    let timeDifference = Double(components.second!) + Double(components.nanosecond!)/1000000000
-//                    WriteToLog.shared.message(stringOfText: "[ViewController.download] time difference: \(timeDifference) seconds")
+//                    WriteToLog.shared.message("[ViewController.download] time difference: \(timeDifference) seconds")
     let components = Calendar.current.dateComponents([
         .hour, .minute, .second, .nanosecond], from: startTime, to: endTime)
     var diffInSeconds = Double(components.hour!)*3600 + Double(components.minute!)*60 + Double(components.second!) + Double(components.nanosecond!)/1000000000
@@ -162,6 +109,6 @@ public func timeDiff(startTime: Date) -> (Int, Int, Int, Double) {
 //    let timeDifference = Int(components.second!) //+ Double(components.nanosecond!)/1000000000
 //    let (h,r) = timeDifference.quotientAndRemainder(dividingBy: 3600)
 //    let (m,s) = r.quotientAndRemainder(dividingBy: 60)
-//    WriteToLog.shared.message(stringOfText: "[ViewController.download] download time: \(h):\(m):\(s) (h:m:s)")
+//    WriteToLog.shared.message("[ViewController.download] download time: \(h):\(m):\(s) (h:m:s)")
     return (Int(components.hour!), Int(components.minute!), Int(components.second!), diffInSeconds)
 }

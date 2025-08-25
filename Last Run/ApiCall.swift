@@ -18,72 +18,75 @@ class ApiCall: NSObject, URLSessionDelegate {
             completion([:])
             return
         }
-        let theServer = JamfProServer.url["source"] ?? ""
+        let theServer = JamfProServer.url
         if theServer == "" {
             completion([:])
             return
         }
         
         // check token
-        
-        let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
-        WriteToLog.shared.message(stringOfText: "[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)")
-    
-        URLCache.shared.removeAllCachedResponses()
-        var existingDestUrl = ""
-        
-        existingDestUrl = "\(theServer)/JSSResource/\(objectEndpoint)"
-        existingDestUrl = existingDestUrl.urlFix
-//        existingDestUrl = existingDestUrl.replacingOccurrences(of: "//JSSResource", with: "/JSSResource")
-//        existingDestUrl = existingDestUrl.replacingOccurrences(of: "/?failover", with: "")
-        
-        if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Json.getRecord] Looking up: \(existingDestUrl)") }
-//      print("existing endpoints URL: \(existingDestUrl)")
-        let destEncodedURL = URL(string: existingDestUrl)
-        let jsonRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
-
-        q.getRecord.maxConcurrentOperationCount = 4
-        
-        let semaphore = DispatchSemaphore(value: 0)
-        q.getRecord.addOperation {
-//        getRecordQ.async {
+        Task {
+            if await TokenManager.shared.tokenInfo?.renewToken ?? true {
+                await TokenManager.shared.setToken(serverUrl: JamfProServer.url, username: JamfProServer.username.lowercased(), password: JamfProServer.password)
+            }
             
-            jsonRequest.httpMethod = "GET"
-            let destConf = URLSessionConfiguration.ephemeral
-
-            destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType["source"] ?? "") \(JamfProServer.accessToken["source"] ?? "")", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
-            let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
-            let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
-                (data, response, error) -> Void in
-                if let httpResponse = response as? HTTPURLResponse {
-//                    print("[Json.getRecord] httpResponse: \(String(describing: httpResponse))")
-                    if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
-                        do {
-                            let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
-                            if let endpointJSON = json as? [String:AnyObject] {
-                                if LogLevel.debug { WriteToLog.shared.message(stringOfText: "[Json.getRecord] \(endpointJSON)") }
-                                completion(endpointJSON)
-                            } else {
-                                WriteToLog.shared.message(stringOfText: "[Json.getRecord] error parsing JSON for \(existingDestUrl)")
-                                completion([:])
+            let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
+            WriteToLog.shared.message("[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)")
+            
+            URLCache.shared.removeAllCachedResponses()
+            var existingDestUrl = ""
+            
+            existingDestUrl = "\(theServer)/JSSResource/\(objectEndpoint)"
+            existingDestUrl = existingDestUrl.urlFix
+            
+            if LogLevel.debug { WriteToLog.shared.message("[Json.getRecord] Looking up: \(existingDestUrl)") }
+            //      print("existing endpoints URL: \(existingDestUrl)")
+            let destEncodedURL = URL(string: existingDestUrl)
+            let jsonRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
+            
+            q.getRecord.maxConcurrentOperationCount = 4
+            
+            let semaphore = DispatchSemaphore(value: 0)
+            q.getRecord.addOperation {
+                //        getRecordQ.async {
+                
+                jsonRequest.httpMethod = "GET"
+                let destConf = URLSessionConfiguration.ephemeral
+                
+                destConf.httpAdditionalHeaders = ["Authorization" : "\(JamfProServer.authType) \(JamfProServer.accessToken)", "Content-Type" : "application/json", "Accept" : "application/json", "User-Agent" : AppInfo.userAgentHeader]
+                let destSession = Foundation.URLSession(configuration: destConf, delegate: self, delegateQueue: OperationQueue.main)
+                let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
+                    (data, response, error) -> Void in
+                    if let httpResponse = response as? HTTPURLResponse {
+                        //                    print("[Json.getRecord] httpResponse: \(String(describing: httpResponse))")
+                        if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
+                            do {
+                                let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
+                                if let endpointJSON = json as? [String:AnyObject] {
+                                    if LogLevel.debug { WriteToLog.shared.message("[Json.getRecord] \(endpointJSON)") }
+                                    completion(endpointJSON)
+                                } else {
+                                    WriteToLog.shared.message("[Json.getRecord] error parsing JSON for \(existingDestUrl)")
+                                    completion([:])
+                                }
                             }
+                        } else {
+                            WriteToLog.shared.message("[Json.getRecord] error HTTP Status Code: \(httpResponse.statusCode)")
+                            completion([:])
                         }
                     } else {
-                        WriteToLog.shared.message(stringOfText: "[Json.getRecord] error HTTP Status Code: \(httpResponse.statusCode)")
+                        WriteToLog.shared.message("[Json.getRecord] error parsing JSON for \(existingDestUrl)")
                         completion([:])
+                    }   // if let httpResponse - end
+                    semaphore.signal()
+                    if error != nil {
                     }
-                } else {
-                    WriteToLog.shared.message(stringOfText: "[Json.getRecord] error parsing JSON for \(existingDestUrl)")
-                    completion([:])
-                }   // if let httpResponse - end
-                semaphore.signal()
-                if error != nil {
-                }
-            })  // let task = destSession - end
-            //print("GET")
-            task.resume()
-            semaphore.wait()
-        }   // getRecordQ - end
+                })  // let task = destSession - end
+                //print("GET")
+                task.resume()
+                semaphore.wait()
+            }   // getRecordQ - end
+        }
     }
     
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping(  URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {

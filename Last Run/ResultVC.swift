@@ -74,7 +74,7 @@ class ResultVC: NSViewController {
                     _ = Alert.shared.display(header: "Attention:", message: "Results exported to ~/Downloads/\(exportFile)", secondButton: "")
                 }
             } catch {
-                WriteToLog.shared.message(stringOfText: "error writing \(currentRow) to \(exportURL)")
+                WriteToLog.shared.message("error writing \(currentRow) to \(exportURL)")
             }
         }
     }
