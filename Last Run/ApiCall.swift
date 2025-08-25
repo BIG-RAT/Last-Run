@@ -31,7 +31,7 @@ class ApiCall: NSObject, URLSessionDelegate {
             }
             
             let objectEndpoint = theEndpoint.replacingOccurrences(of: "//", with: "/")
-            WriteToLog.shared.message("[Json.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)")
+            WriteToLog.shared.message("[ApiCall.getRecord] get endpoint: \(objectEndpoint) from server: \(theServer)")
             
             URLCache.shared.removeAllCachedResponses()
             var existingDestUrl = ""
@@ -39,7 +39,7 @@ class ApiCall: NSObject, URLSessionDelegate {
             existingDestUrl = "\(theServer)/JSSResource/\(objectEndpoint)"
             existingDestUrl = existingDestUrl.urlFix
             
-            if LogLevel.debug { WriteToLog.shared.message("[Json.getRecord] Looking up: \(existingDestUrl)") }
+            if LogLevel.debug { WriteToLog.shared.message("[ApiCall.getRecord] Looking up: \(existingDestUrl)") }
             //      print("existing endpoints URL: \(existingDestUrl)")
             let destEncodedURL = URL(string: existingDestUrl)
             let jsonRequest    = NSMutableURLRequest(url: destEncodedURL! as URL)
@@ -58,24 +58,24 @@ class ApiCall: NSObject, URLSessionDelegate {
                 let task = destSession.dataTask(with: jsonRequest as URLRequest, completionHandler: {
                     (data, response, error) -> Void in
                     if let httpResponse = response as? HTTPURLResponse {
-                        //                    print("[Json.getRecord] httpResponse: \(String(describing: httpResponse))")
+                        //                    print("[ApiCall.getRecord] httpResponse: \(String(describing: httpResponse))")
                         if httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299 {
                             do {
                                 let json = try? JSONSerialization.jsonObject(with: data!, options: .allowFragments)
                                 if let endpointJSON = json as? [String:AnyObject] {
-                                    if LogLevel.debug { WriteToLog.shared.message("[Json.getRecord] \(endpointJSON)") }
+                                    if LogLevel.debug { WriteToLog.shared.message("[ApiCall.getRecord] \(endpointJSON)") }
                                     completion(endpointJSON)
                                 } else {
-                                    WriteToLog.shared.message("[Json.getRecord] error parsing JSON for \(existingDestUrl)")
+                                    WriteToLog.shared.message("[ApiCall.getRecord] error parsing JSON for \(existingDestUrl)")
                                     completion([:])
                                 }
                             }
                         } else {
-                            WriteToLog.shared.message("[Json.getRecord] error HTTP Status Code: \(httpResponse.statusCode)")
+                            WriteToLog.shared.message("[ApiCall.getRecord] error HTTP Status Code: \(httpResponse.statusCode)")
                             completion([:])
                         }
                     } else {
-                        WriteToLog.shared.message("[Json.getRecord] error parsing JSON for \(existingDestUrl)")
+                        WriteToLog.shared.message("[ApiCall.getRecord] error parsing JSON for \(existingDestUrl)")
                         completion([:])
                     }   // if let httpResponse - end
                     semaphore.signal()

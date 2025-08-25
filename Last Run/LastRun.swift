@@ -31,8 +31,8 @@ class LastRun {
     func computers(jamfServer: String, b64Creds: String, theEndpoint: String, checkPolicies: Bool, checkCompCPs: Bool, checkCompApps: Bool, completion: @escaping (_ result: [String:[String:String]]) -> Void) {
         
         var computerCounter = 0
-        var policyCount = 0
-        var macAppcount = 0
+//        var policyCount = 0
+//        var macAppcount = 0
         var totalComputerCalls = 0
         
         var apiCounter = 0
@@ -42,11 +42,15 @@ class LastRun {
         ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: theEndpoint, skip: !(checkPolicies || checkCompCPs || checkCompApps)) { [self]
             (computerResult: [String:AnyObject]) in
             computerCounter = computerResult.count
-            //                print("computers: \(computerResult)")
+            print("[LastRun.computers] computers: \(computerResult)")
+            if computerResult["computers"]?.count == 0 {
+                completion(resultsDict)
+                return
+            }
             ApiCall.shared.getRecord(base64Creds: b64Creds, theEndpoint: "policies", skip: !checkPolicies) { [self]
                 (policiesResult: [String:AnyObject]) in
                 
-                policyCount = policiesResult.count
+//                policyCount = policiesResult.count
                 
                 var usedPolicyIDs = [String]()
                 if policiesResult.count > 0 {

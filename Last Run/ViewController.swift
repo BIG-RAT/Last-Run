@@ -32,9 +32,6 @@ class ViewController: NSViewController, SendLoginInfoDelegate, UpdateProgressDel
     let prefsPath = URL(fileURLWithPath: NSHomeDirectory() + "/Library/Application Support/Last Run/settings.plist")
 
     @IBOutlet weak var jamfServer_TextField: NSTextField!
-//    @IBOutlet weak var uname_TextField: NSTextField!
-//    @IBOutlet weak var passwd_TextField: NSSecureTextField!
-//    @IBOutlet weak var saveCreds_button: NSButton!
     
     @IBOutlet var policies_button: NSButton!
     @IBOutlet var ccp_button: NSButton!
@@ -42,6 +39,8 @@ class ViewController: NSViewController, SendLoginInfoDelegate, UpdateProgressDel
     @IBOutlet var cApps_button: NSButton!
     @IBOutlet var mdApps_button: NSButton!
     
+    @IBOutlet weak var computerProgress_Label: NSTextField!
+    @IBOutlet weak var deviceProgress_Label: NSTextField!
     
     @IBOutlet var spinner_progress: NSProgressIndicator!
     @IBOutlet weak var computersProgress_PI: NSProgressIndicator!
@@ -96,6 +95,15 @@ class ViewController: NSViewController, SendLoginInfoDelegate, UpdateProgressDel
             checkMDApps   = (mdApps_button.state.rawValue == 1) ? true:false
             
             spinner_progress.startAnimation(self)
+            
+            if checkPolicies || checkCompCPs || checkCompApps {
+                computerProgress_Label.isHidden = false
+                computersProgress_PI.isHidden = false
+            }
+            if checkMDCPs || checkMDApps {
+                deviceProgress_Label.isHidden = false
+                devicesProgress_PI.isHidden = false
+            }
             search_button.isEnabled = false
             runComplete = false
             updateProgress(label: "computers", progress: Double(-1.0))
@@ -131,7 +139,7 @@ class ViewController: NSViewController, SendLoginInfoDelegate, UpdateProgressDel
     }
     
     override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
-        print("[prepare] segue.identifier: \(segue.identifier)")
+//        print("[prepare] segue.identifier: \(segue.identifier)")
         if segue.identifier == "loginView" {
                 let loginVC: LoginVC = segue.destinationController as! LoginVC
                 loginVC.delegate = self
@@ -140,6 +148,22 @@ class ViewController: NSViewController, SendLoginInfoDelegate, UpdateProgressDel
                     resultsVC.resultsDict = resultsDict
             }
         }
+    }
+    
+    @IBAction func logout(_ sender: NSButton) {
+        WriteToLog.shared.message("[logout]")
+        policies_button.state = .off
+        ccp_button.state = .off
+        cApps_button.state = .off
+        mdcp_button.state = .off
+        mdApps_button.state = .off
+                         
+        computerProgress_Label.isHidden = true
+        computersProgress_PI.isHidden = true
+        deviceProgress_Label.isHidden = true
+        devicesProgress_PI.isHidden = true
+        performSegue(withIdentifier: "loginView", sender: nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
     
     override func viewDidLoad() {
